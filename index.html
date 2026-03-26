@@ -1002,123 +1002,82 @@
     showToast('⚠ Imprimante déconnectée');
   }
 
-  // ——— RENDU CANVAS → BITMAP TSC ———
-  // 203 dpi : 50mm = 400px, 30mm = 240px
-  function renderLabelToCanvas(mat, ep, unite, h, lon, ud, jName, jNum) {
-    const W = 400, H = 240;
-    const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
+  // ——— COMMANDES TSC AVEC POLICES INTÉGRÉES CT221B ———
+  // Polices dispo : "0"=8x8, "1"=12x20, "2"=16x24, "3"=20x28, "4"=24x32, "5"=32x48
+  // TSPL2 : TEXT x,y,"police",rotation,xmul,ymul,"texte"
+  // Coordonnées en dots (203dpi : 1mm = 8 dots) — 50mm=400dots, 30mm=240dots
+  // Zone safe : x 0→390, y 0→228
 
-    // Fond BLANC
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#000000';
+  function buildTSC(mat, ep, unite, h, lon, ud, jName, jNum, qty) {
+    const MX = 8;
+    let y = 4;
+    let cmds = '';
 
-    const MX = 10;
-    let y = 8;
+    // ── EN-TÊTE ──
+    cmds += `SIZE 50 mm,30 mm\r\n`;
+    cmds += `GAP 3 mm,0 mm\r\n`;
+    cmds += `DIRECTION 0,0\r\n`;
+    cmds += `REFERENCE 0,0\r\n`;
+    cmds += `OFFSET 0 mm\r\n`;
+    cmds += `CLS\r\n`;
 
-    // ── JOB ──
+    // ── JOB (optionnel) ──
     if (jName || jNum) {
-      ctx.font = '600 16px Arial, sans-serif';
-      if (jName) ctx.fillText(jName.toUpperCase().substring(0, 24), MX, y + 14);
-      if (jNum) {
-        const nw = ctx.measureText(jNum.toUpperCase()).width;
-        ctx.fillText(jNum.toUpperCase(), W - MX - nw, y + 14);
-      }
-      y += 18;
-      ctx.fillRect(MX, y, W - MX * 2, 1);
-      y += 5;
+      // Police "2" = 16x24dots → hauteur rendue ~24dots
+      if (jName) cmds += `TEXT ${MX},${y},"2",0,1,1,"${jName.toUpperCase().substring(0,18)}"\r\n`;
+      if (jNum)  cmds += `TEXT ${jName ? 210 : MX},${y},"2",0,1,1,"${jNum.toUpperCase().substring(0,10)}"\r\n`;
+      y += 26;
+      cmds += `BAR ${MX},${y},${390-MX},1\r\n`;
+      y += 4;
     }
 
-    // ── MATIÈRE : taille auto pour tenir sur 1 ligne ──
-    let matSize = 52;
-    ctx.font = `900 ${matSize}px Arial Black, Arial, sans-serif`;
-    while (ctx.measureText(mat.toUpperCase()).width > W - MX * 2 && matSize > 14) {
-      matSize -= 2;
-      ctx.font = `900 ${matSize}px Arial Black, Arial, sans-serif`;
-    }
-    ctx.fillText(mat.toUpperCase(), MX, y + matSize * 0.82);
-    y += matSize + 4;
+    // ── MATIÈRE (police adaptée à la longueur) ──
+    const mlen = mat.length;
+    let mFont, mMul, mH;
+    if      (mlen <= 5)  { mFont="5"; mMul=2; mH=52; } // très court → énorme
+    else if (mlen <= 8)  { mFont="5"; mMul=1; mH=50; } // court → grande
+    else if (mlen <= 12) { mFont="4"; mMul=2; mH=38; } // moyen
+    else if (mlen <= 16) { mFont="4"; mMul=1; mH=34; } // long
+    else                 { mFont="3"; mMul=1; mH=30; } // très long
 
-    // ── ÉPAISSEUR ──
+    // Si job présent, réduire
+    if ((jName||jNum) && mMul > 1) { mMul=1; mH -= 10; }
+
+    cmds += `TEXT ${MX},${y},"${mFont}",0,${mMul},${mMul},"${mat.toUpperCase().substring(0,20)}"\r\n`;
+    y += mH;
+
+    // ── ÉPAISSEUR (police "3" = 20x28) ──
     if (ep) {
-      ctx.font = '500 20px Courier New, monospace';
-      ctx.fillText(`ep. ${ep} ${unite}`, MX, y + 18);
-      y += 24;
+      cmds += `TEXT ${MX},${y},"3",0,1,1,"EP: ${ep} ${unite}"\r\n`;
+      y += 30;
     }
 
-    // ── DIMENSIONS ──
+    // ── DIMENSIONS (police "3") ──
     if (h || lon) {
-      let dimStr = '';
-      if (h)   dimStr += `H: ${h}`;
-      if (lon) dimStr += (dimStr ? '  x  ' : '') + `L: ${lon}`;
-      if (dimStr) dimStr += ` ${ud}`;
-      ctx.font = 'bold 18px Arial, sans-serif';
-      ctx.fillText(dimStr, MX, y + 16);
-      y += 22;
+      let dim = '';
+      if (h)   dim += `H:${h}`;
+      if (lon) dim += (dim ? ' x ' : '') + `L:${lon}`;
+      if (dim) dim += ` ${ud}`;
+      cmds += `TEXT ${MX},${y},"3",0,1,1,"${dim}"\r\n`;
+      y += 30;
     }
 
-    // ── PIED ──
-    ctx.fillRect(MX, H - 20, W - MX * 2, 1);
-    ctx.font = 'bold 13px Arial, sans-serif';
-    ctx.fillText('LuxVisual', MX, H - 5);
+    // ── PIED : ligne séparatrice + LuxVisual (police "1" = 12x20) ──
+    cmds += `BAR ${MX},216,${390-MX},1\r\n`;
+    cmds += `TEXT ${MX},218,"1",0,1,1,"LuxVisual"\r\n`;
 
-    return canvas;
+    // ── IMPRESSION ──
+    cmds += `PRINT ${qty},1\r\n`;
+
+    return cmds;
   }
 
-  // Convertit canvas en bitmap 1-bit TSC (0=blanc, 1=noir) — PAS inversé
-  function canvasToBitmap(canvas) {
-    const W = canvas.width, H = canvas.height;
-    const ctx = canvas.getContext('2d');
-    const imgData = ctx.getImageData(0, 0, W, H).data;
-    const bytesPerRow = Math.ceil(W / 8);
-    const bitmapBytes = new Uint8Array(bytesPerRow * H);
-
-    for (let row = 0; row < H; row++) {
-      for (let col = 0; col < W; col++) {
-        const idx = (row * W + col) * 4;
-        const lum = 0.299 * imgData[idx] + 0.587 * imgData[idx+1] + 0.114 * imgData[idx+2];
-        // Noir (lum < 128) → bit à 1 dans le bitmap TSC
-        if (lum < 128) {
-          bitmapBytes[row * bytesPerRow + Math.floor(col / 8)] |= (0x80 >> (col % 8));
-        }
-      }
-    }
-    return { bytes: bitmapBytes, bytesPerRow, width: W, height: H };
-  }
-
-  // Assemble la commande TSC BITMAP complète en Uint8Array
-  function buildTSCBitmap(canvas, qty) {
-    const { bytes, bytesPerRow, height } = canvasToBitmap(canvas);
-    const enc = new TextEncoder();
-
-    const header = enc.encode(
-      `SIZE 50 mm,30 mm\r\n` +
-      `GAP 3 mm,0 mm\r\n` +
-      `DIRECTION 0,0\r\n` +
-      `REFERENCE 0,0\r\n` +
-      `OFFSET 0 mm\r\n` +
-      `CLS\r\n` +
-      `BITMAP 0,0,${bytesPerRow},${height},0,`
-    );
-    const footer = enc.encode(`\r\nPRINT ${qty},1\r\n`);
-
-    const out = new Uint8Array(header.length + bytes.length + footer.length);
-    out.set(header, 0);
-    out.set(bytes, header.length);
-    out.set(footer, header.length + bytes.length);
-    return out;
-  }
-
-  // ——— ENVOI BLE en chunks optimisés ———
+  // ——— ENVOI BLE en chunks ———
   async function bleWriteChunked(data) {
-    // MTU Android typique = 512 bytes après négociation, on utilise 200 par sécurité
-    const CHUNK = 200;
+    const CHUNK = 128;
     for (let i = 0; i < data.length; i += CHUNK) {
       await bleChar.writeValue(data.slice(i, i + CHUNK));
-      // Délai minimal seulement si nécessaire
-      if (data.length > 2000) await new Promise(r => setTimeout(r, 5));
+      await new Promise(r => setTimeout(r, 20));
     }
   }
 
@@ -1143,10 +1102,9 @@
     }
 
     try {
-      showToast('🖨 Rendu...');
-      const canvas = renderLabelToCanvas(mat, ep, unite, h, lon, ud, jName, jNum);
-      const data   = buildTSCBitmap(canvas, copies);
-      showToast(`📡 Envoi ${Math.round(data.length/1024)}kb...`);
+      showToast(`🖨 Envoi × ${copies}...`);
+      const tsc  = buildTSC(mat, ep, unite, h, lon, ud, jName, jNum, copies);
+      const data = new TextEncoder().encode(tsc);
       await bleWriteChunked(data);
       showToast(`✅ ${copies} étiquette(s) !`);
     } catch(e) {
