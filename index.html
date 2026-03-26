@@ -1018,66 +1018,135 @@
     }
   }
 
-  // ——— CONSTRUIRE COMMANDE TSC ———
-  // Format étiquette : 50mm x 30mm, résolution 203dpi
-  // 1mm = 8 dots @ 203dpi
-  function buildTSC(mat, ep, unite, h, lon, ud, jName, jNum, qty) {
-    // Dimensions en dots (203 dpi, 1mm ≈ 8 dots)
-    const W = 400; // 50mm * 8
-    const H = 240; // 30mm * 8
-    const GAP = 24; // 3mm gap entre étiquettes
+  // ——— RENDU CANVAS → BITMAP TSC ———
+  // Dessine l'étiquette sur un Canvas 400x240 (203dpi, 50x30mm)
+  // puis convertit en bitmap 1bit pour commande TSC BITMAP
+  function renderLabelToCanvas(mat, ep, unite, h, lon, ud, jName, jNum) {
+    const W = 400, H = 240; // dots @ 203dpi
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
 
-    let y = 10;
-    let cmds = '';
+    // Fond blanc
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
 
-    cmds += `SIZE 50 mm, 30 mm\r\n`;
-    cmds += `GAP 3 mm, 0 mm\r\n`;
-    cmds += `DIRECTION 0\r\n`;
-    cmds += `CLS\r\n`;
+    ctx.fillStyle = '#000000';
+    const MX = 8; // marge gauche
+    let y = 8;
 
-    // Job (si activé)
+    // ── JOB ──
     if (jName || jNum) {
-      if (jName) {
-        cmds += `TEXT 10,${y},"3",0,1,1,"${jName.toUpperCase()}"\r\n`;
-      }
+      ctx.font = 'bold 18px Barlow Condensed, sans-serif';
+      if (jName) ctx.fillText(jName.toUpperCase(), MX, y + 16);
       if (jNum) {
-        const xNum = jName ? 220 : 10;
-        cmds += `TEXT ${xNum},${y},"3",0,1,1,"${jNum.toUpperCase()}"\r\n`;
+        const numX = jName ? W - MX - ctx.measureText(jNum.toUpperCase()).width : MX;
+        ctx.fillText(jNum.toUpperCase(), numX, y + 16);
       }
-      y += 28;
-      cmds += `BAR 10,${y},380,2\r\n`;
-      y += 8;
+      y += 22;
+      ctx.fillRect(MX, y, W - MX * 2, 1);
+      y += 6;
     }
 
-    // Matière (grande police)
-    cmds += `TEXT 10,${y},"4",0,2,2,"${mat.toUpperCase()}"\r\n`;
-    y += 44;
+    // ── MATIÈRE ──
+    const matLen = mat.length;
+    let matSize = matLen <= 6 ? 58 : matLen <= 10 ? 48 : matLen <= 14 ? 38 : 28;
+    // Réduire si job présent
+    if (jName || jNum) matSize = Math.min(matSize, 44);
 
-    // Épaisseur
+    ctx.font = `900 ${matSize}px Barlow Condensed, sans-serif`;
+    // Réduire jusqu'à ce que ça rentre
+    while (ctx.measureText(mat.toUpperCase()).width > W - MX * 2 && matSize > 16) {
+      matSize -= 2;
+      ctx.font = `900 ${matSize}px Barlow Condensed, sans-serif`;
+    }
+    ctx.fillText(mat.toUpperCase(), MX, y + matSize * 0.85);
+    y += matSize + 4;
+
+    // ── ÉPAISSEUR ──
     if (ep) {
-      cmds += `TEXT 10,${y},"3",0,1,1,"EP: ${ep} ${unite}"\r\n`;
-      y += 28;
+      ctx.font = '500 22px Share Tech Mono, monospace';
+      ctx.fillText(`ép. ${ep} ${unite}`, MX, y + 20);
+      y += 26;
     }
 
-    // Dimensions
+    // ── DIMENSIONS ──
     if (h || lon) {
       let dimStr = '';
-      if (h)   dimStr += `H:${h}`;
-      if (lon) dimStr += (dimStr ? '  x  ' : '') + `L:${lon}`;
+      if (h)   dimStr += `H : ${h}`;
+      if (lon) dimStr += (dimStr ? '  ×  ' : '') + `L : ${lon}`;
       if (dimStr) dimStr += ` ${ud}`;
-      cmds += `TEXT 10,${y},"3",0,1,1,"${dimStr}"\r\n`;
-      y += 28;
+      ctx.font = 'bold 18px Barlow Condensed, sans-serif';
+      ctx.fillRect(MX, y, W - MX * 2, 1); // petite ligne déco
+      y += 3;
+      ctx.fillText(dimStr, MX, y + 16);
+      y += 20;
     }
 
-    // Ligne de pied + petite info
-    cmds += `BAR 10,210,380,1\r\n`;
-    cmds += `TEXT 10,215,"1",0,1,1,"CT221B  50x30mm"\r\n`;
+    // ── PIED : ligne + logo LuxVisual ──
+    const footY = H - 18;
+    ctx.fillRect(MX, footY, W - MX * 2, 1);
+    ctx.font = 'bold 13px Barlow Condensed, sans-serif';
+    ctx.fillText('LuxVisual', MX, H - 4);
 
-    cmds += `PRINT ${qty},1\r\n`;
-    return cmds;
+    return canvas;
   }
 
-  // ——— IMPRESSION BLE ———
+  // Convertit le canvas en bitmap 1-bit pour TSC BITMAP
+  function canvasToBitmap(canvas) {
+    const W = canvas.width, H = canvas.height;
+    const ctx = canvas.getContext('2d');
+    const imgData = ctx.getImageData(0, 0, W, H).data;
+
+    // Chaque ligne : ceil(W/8) bytes
+    const bytesPerRow = Math.ceil(W / 8);
+    const bitmapBytes = new Uint8Array(bytesPerRow * H);
+
+    for (let row = 0; row < H; row++) {
+      for (let col = 0; col < W; col++) {
+        const idx = (row * W + col) * 4;
+        const r = imgData[idx], g = imgData[idx+1], b = imgData[idx+2];
+        // Luminance — pixel noir si < 128
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        if (lum < 128) {
+          // TSC BITMAP : bit 7 = pixel le plus à gauche
+          const byteIdx = row * bytesPerRow + Math.floor(col / 8);
+          bitmapBytes[byteIdx] |= (0x80 >> (col % 8));
+        }
+      }
+    }
+    return { bytes: bitmapBytes, bytesPerRow, width: W, height: H };
+  }
+
+  // Construit la commande TSC complète avec BITMAP
+  function buildTSCBitmap(canvas, qty) {
+    const { bytes, bytesPerRow, width, height } = canvasToBitmap(canvas);
+
+    // En-tête texte
+    const header =
+      `SIZE 50 mm,30 mm\r\n` +
+      `GAP 3 mm,0 mm\r\n` +
+      `DIRECTION 0,0\r\n` +
+      `REFERENCE 0,0\r\n` +
+      `OFFSET 0 mm\r\n` +
+      `CLS\r\n` +
+      `BITMAP 0,0,${bytesPerRow},${height},0,`;
+
+    const footer = `\r\nPRINT ${qty},1\r\n`;
+
+    const enc = new TextEncoder();
+    const headerBytes = enc.encode(header);
+    const footerBytes = enc.encode(footer);
+
+    // Assemblage : header + bitmap bytes + footer
+    const total = new Uint8Array(headerBytes.length + bytes.length + footerBytes.length);
+    total.set(headerBytes, 0);
+    total.set(bytes, headerBytes.length);
+    total.set(footerBytes, headerBytes.length + bytes.length);
+    return total;
+  }
+
+  // ——— IMPRESSION BLE ───
   async function printLabel() {
     const mat = document.getElementById('matiere').value;
     if (!mat) { showToast('⚠ Entrez le nom de la matière'); return; }
@@ -1098,14 +1167,15 @@
     }
 
     try {
-      showToast(`🖨 Envoi × ${copies}...`);
-      const tsc  = buildTSC(mat, ep, unite, h, lon, ud, jName, jNum, copies);
-      const data = tscEncode(tsc);
+      showToast(`🖨 Rendu bitmap...`);
+      const canvas = renderLabelToCanvas(mat, ep, unite, h, lon, ud, jName, jNum);
+      const data   = buildTSCBitmap(canvas, copies);
+      showToast(`📡 Envoi × ${copies}...`);
       await bleWriteChunked(data);
       showToast(`✅ ${copies} étiquette(s) envoyée(s) !`);
     } catch(e) {
       console.error(e);
-      showToast('❌ Erreur impression: ' + e.message);
+      showToast('❌ Erreur: ' + e.message);
     }
   }
 
