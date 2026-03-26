@@ -1002,151 +1002,127 @@
     showToast('⚠ Imprimante déconnectée');
   }
 
-  // ——— ENCODE TSC → Uint8Array ———
-  function tscEncode(str) {
-    const enc = new TextEncoder();
-    return enc.encode(str);
-  }
-
-  // ——— ENVOYER EN CHUNKS (BLE MTU ~20 bytes) ———
-  async function bleWriteChunked(data) {
-    const CHUNK = 20;
-    for (let i = 0; i < data.length; i += CHUNK) {
-      const chunk = data.slice(i, i + CHUNK);
-      await bleChar.writeValue(chunk);
-      await new Promise(r => setTimeout(r, 30)); // petit délai entre chunks
-    }
-  }
-
   // ——— RENDU CANVAS → BITMAP TSC ———
-  // Dessine l'étiquette sur un Canvas 400x240 (203dpi, 50x30mm)
-  // puis convertit en bitmap 1bit pour commande TSC BITMAP
+  // 203 dpi : 50mm = 400px, 30mm = 240px
   function renderLabelToCanvas(mat, ep, unite, h, lon, ud, jName, jNum) {
-    const W = 400, H = 240; // dots @ 203dpi
+    const W = 400, H = 240;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
 
-    // Fond blanc
+    // Fond BLANC
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, H);
-
     ctx.fillStyle = '#000000';
-    const MX = 8; // marge gauche
+
+    const MX = 10;
     let y = 8;
 
     // ── JOB ──
     if (jName || jNum) {
-      ctx.font = 'bold 18px Barlow Condensed, sans-serif';
-      if (jName) ctx.fillText(jName.toUpperCase(), MX, y + 16);
+      ctx.font = '600 16px Arial, sans-serif';
+      if (jName) ctx.fillText(jName.toUpperCase().substring(0, 24), MX, y + 14);
       if (jNum) {
-        const numX = jName ? W - MX - ctx.measureText(jNum.toUpperCase()).width : MX;
-        ctx.fillText(jNum.toUpperCase(), numX, y + 16);
+        const nw = ctx.measureText(jNum.toUpperCase()).width;
+        ctx.fillText(jNum.toUpperCase(), W - MX - nw, y + 14);
       }
-      y += 22;
+      y += 18;
       ctx.fillRect(MX, y, W - MX * 2, 1);
-      y += 6;
+      y += 5;
     }
 
-    // ── MATIÈRE ──
-    const matLen = mat.length;
-    let matSize = matLen <= 6 ? 58 : matLen <= 10 ? 48 : matLen <= 14 ? 38 : 28;
-    // Réduire si job présent
-    if (jName || jNum) matSize = Math.min(matSize, 44);
-
-    ctx.font = `900 ${matSize}px Barlow Condensed, sans-serif`;
-    // Réduire jusqu'à ce que ça rentre
-    while (ctx.measureText(mat.toUpperCase()).width > W - MX * 2 && matSize > 16) {
+    // ── MATIÈRE : taille auto pour tenir sur 1 ligne ──
+    let matSize = 52;
+    ctx.font = `900 ${matSize}px Arial Black, Arial, sans-serif`;
+    while (ctx.measureText(mat.toUpperCase()).width > W - MX * 2 && matSize > 14) {
       matSize -= 2;
-      ctx.font = `900 ${matSize}px Barlow Condensed, sans-serif`;
+      ctx.font = `900 ${matSize}px Arial Black, Arial, sans-serif`;
     }
-    ctx.fillText(mat.toUpperCase(), MX, y + matSize * 0.85);
+    ctx.fillText(mat.toUpperCase(), MX, y + matSize * 0.82);
     y += matSize + 4;
 
     // ── ÉPAISSEUR ──
     if (ep) {
-      ctx.font = '500 22px Share Tech Mono, monospace';
-      ctx.fillText(`ép. ${ep} ${unite}`, MX, y + 20);
-      y += 26;
+      ctx.font = '500 20px Courier New, monospace';
+      ctx.fillText(`ep. ${ep} ${unite}`, MX, y + 18);
+      y += 24;
     }
 
     // ── DIMENSIONS ──
     if (h || lon) {
       let dimStr = '';
-      if (h)   dimStr += `H : ${h}`;
-      if (lon) dimStr += (dimStr ? '  ×  ' : '') + `L : ${lon}`;
+      if (h)   dimStr += `H: ${h}`;
+      if (lon) dimStr += (dimStr ? '  x  ' : '') + `L: ${lon}`;
       if (dimStr) dimStr += ` ${ud}`;
-      ctx.font = 'bold 18px Barlow Condensed, sans-serif';
-      ctx.fillRect(MX, y, W - MX * 2, 1); // petite ligne déco
-      y += 3;
+      ctx.font = 'bold 18px Arial, sans-serif';
       ctx.fillText(dimStr, MX, y + 16);
-      y += 20;
+      y += 22;
     }
 
-    // ── PIED : ligne + logo LuxVisual ──
-    const footY = H - 18;
-    ctx.fillRect(MX, footY, W - MX * 2, 1);
-    ctx.font = 'bold 13px Barlow Condensed, sans-serif';
-    ctx.fillText('LuxVisual', MX, H - 4);
+    // ── PIED ──
+    ctx.fillRect(MX, H - 20, W - MX * 2, 1);
+    ctx.font = 'bold 13px Arial, sans-serif';
+    ctx.fillText('LuxVisual', MX, H - 5);
 
     return canvas;
   }
 
-  // Convertit le canvas en bitmap 1-bit pour TSC BITMAP
+  // Convertit canvas en bitmap 1-bit TSC (0=blanc, 1=noir) — PAS inversé
   function canvasToBitmap(canvas) {
     const W = canvas.width, H = canvas.height;
     const ctx = canvas.getContext('2d');
     const imgData = ctx.getImageData(0, 0, W, H).data;
-
-    // Chaque ligne : ceil(W/8) bytes
     const bytesPerRow = Math.ceil(W / 8);
     const bitmapBytes = new Uint8Array(bytesPerRow * H);
 
     for (let row = 0; row < H; row++) {
       for (let col = 0; col < W; col++) {
         const idx = (row * W + col) * 4;
-        const r = imgData[idx], g = imgData[idx+1], b = imgData[idx+2];
-        // Luminance — pixel noir si < 128
-        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        const lum = 0.299 * imgData[idx] + 0.587 * imgData[idx+1] + 0.114 * imgData[idx+2];
+        // Noir (lum < 128) → bit à 1 dans le bitmap TSC
         if (lum < 128) {
-          // TSC BITMAP : bit 7 = pixel le plus à gauche
-          const byteIdx = row * bytesPerRow + Math.floor(col / 8);
-          bitmapBytes[byteIdx] |= (0x80 >> (col % 8));
+          bitmapBytes[row * bytesPerRow + Math.floor(col / 8)] |= (0x80 >> (col % 8));
         }
       }
     }
     return { bytes: bitmapBytes, bytesPerRow, width: W, height: H };
   }
 
-  // Construit la commande TSC complète avec BITMAP
+  // Assemble la commande TSC BITMAP complète en Uint8Array
   function buildTSCBitmap(canvas, qty) {
-    const { bytes, bytesPerRow, width, height } = canvasToBitmap(canvas);
+    const { bytes, bytesPerRow, height } = canvasToBitmap(canvas);
+    const enc = new TextEncoder();
 
-    // En-tête texte
-    const header =
+    const header = enc.encode(
       `SIZE 50 mm,30 mm\r\n` +
       `GAP 3 mm,0 mm\r\n` +
       `DIRECTION 0,0\r\n` +
       `REFERENCE 0,0\r\n` +
       `OFFSET 0 mm\r\n` +
       `CLS\r\n` +
-      `BITMAP 0,0,${bytesPerRow},${height},0,`;
+      `BITMAP 0,0,${bytesPerRow},${height},0,`
+    );
+    const footer = enc.encode(`\r\nPRINT ${qty},1\r\n`);
 
-    const footer = `\r\nPRINT ${qty},1\r\n`;
-
-    const enc = new TextEncoder();
-    const headerBytes = enc.encode(header);
-    const footerBytes = enc.encode(footer);
-
-    // Assemblage : header + bitmap bytes + footer
-    const total = new Uint8Array(headerBytes.length + bytes.length + footerBytes.length);
-    total.set(headerBytes, 0);
-    total.set(bytes, headerBytes.length);
-    total.set(footerBytes, headerBytes.length + bytes.length);
-    return total;
+    const out = new Uint8Array(header.length + bytes.length + footer.length);
+    out.set(header, 0);
+    out.set(bytes, header.length);
+    out.set(footer, header.length + bytes.length);
+    return out;
   }
 
-  // ——— IMPRESSION BLE ───
+  // ——— ENVOI BLE en chunks optimisés ———
+  async function bleWriteChunked(data) {
+    // MTU Android typique = 512 bytes après négociation, on utilise 200 par sécurité
+    const CHUNK = 200;
+    for (let i = 0; i < data.length; i += CHUNK) {
+      await bleChar.writeValue(data.slice(i, i + CHUNK));
+      // Délai minimal seulement si nécessaire
+      if (data.length > 2000) await new Promise(r => setTimeout(r, 5));
+    }
+  }
+
+  // ——— IMPRESSION BLE ———
   async function printLabel() {
     const mat = document.getElementById('matiere').value;
     if (!mat) { showToast('⚠ Entrez le nom de la matière'); return; }
@@ -1167,15 +1143,15 @@
     }
 
     try {
-      showToast(`🖨 Rendu bitmap...`);
+      showToast('🖨 Rendu...');
       const canvas = renderLabelToCanvas(mat, ep, unite, h, lon, ud, jName, jNum);
       const data   = buildTSCBitmap(canvas, copies);
-      showToast(`📡 Envoi × ${copies}...`);
+      showToast(`📡 Envoi ${Math.round(data.length/1024)}kb...`);
       await bleWriteChunked(data);
-      showToast(`✅ ${copies} étiquette(s) envoyée(s) !`);
+      showToast(`✅ ${copies} étiquette(s) !`);
     } catch(e) {
       console.error(e);
-      showToast('❌ Erreur: ' + e.message);
+      showToast('❌ ' + e.message);
     }
   }
 
