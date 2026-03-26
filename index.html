@@ -893,9 +893,26 @@
   let bleDevice = null;
   let bleChar = null;
 
-  // UUID service + caractéristique SPP BLE standard (CT221B / imprimantes TSC BLE)
-  const BLE_SERVICE   = '000018f0-0000-1000-8000-00805f9b34fb';
-  const BLE_CHAR_WRITE = '00002af1-0000-1000-8000-00805f9b34fb';
+  // Tous les UUID connus pour imprimantes CLabel / TSC / Zebra BLE
+  const KNOWN_SERVICES = [
+    '000018f0-0000-1000-8000-00805f9b34fb', // CLabel CT221B standard
+    '00001101-0000-1000-8000-00805f9b34fb', // SPP classique
+    'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // TSC série récente
+    '49535343-fe7d-4ae5-8fa9-9fafd205e455', // Peripage / CLabel variante
+    '000018f0-0000-1000-8000-00805f9b34fb',
+  ];
+
+  const KNOWN_CHARS = [
+    '00002af1-0000-1000-8000-00805f9b34fb', // CLabel standard
+    'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f', // TSC récent
+    '49535343-8841-43f4-a8d4-ecbe34729bb3', // Peripage variante
+    '00002af0-0000-1000-8000-00805f9b34fb',
+  ];
+
+  function logStatus(msg) {
+    console.log('[BLE]', msg);
+    document.getElementById('statusText').textContent = msg;
+  }
 
   // ——— BLUETOOTH CONNECT ———
   async function connectPrinter() {
@@ -904,27 +921,81 @@
       return;
     }
     try {
-      showToast('🔍 Recherche CT221B...');
+      logStatus('🔍 Sélection appareil...');
       bleDevice = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: [BLE_SERVICE]
+        optionalServices: KNOWN_SERVICES
       });
 
       bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
-      showToast('🔗 Connexion GATT...');
+      logStatus('🔗 Connexion GATT...');
 
-      const server  = await bleDevice.gatt.connect();
-      const service = await server.getPrimaryService(BLE_SERVICE);
-      bleChar = await service.getCharacteristic(BLE_CHAR_WRITE);
+      const server = await bleDevice.gatt.connect();
+      logStatus('📋 Lecture des services...');
+
+      // Lister tous les services disponibles
+      let allServices = [];
+      try {
+        allServices = await server.getPrimaryServices();
+        console.log('[BLE] Services trouvés:', allServices.map(s => s.uuid));
+        logStatus(`🔎 ${allServices.length} service(s) trouvé(s)...`);
+      } catch(e) {
+        console.warn('[BLE] getPrimaryServices failed, essai UUID par UUID', e);
+      }
+
+      // Essai 1 : parcourir les services trouvés
+      for (const svc of allServices) {
+        try {
+          const chars = await svc.getCharacteristics();
+          console.log('[BLE] Service', svc.uuid, '→ chars:', chars.map(c => c.uuid));
+          for (const c of chars) {
+            if (c.properties.write || c.properties.writeWithoutResponse) {
+              bleChar = c;
+              console.log('[BLE] ✅ Char écriture trouvée:', c.uuid);
+              break;
+            }
+          }
+          if (bleChar) break;
+        } catch(e) { console.warn('[BLE] Svc', svc.uuid, 'erreur:', e.message); }
+      }
+
+      // Essai 2 : forcer les UUID connus si rien trouvé
+      if (!bleChar) {
+        logStatus('🔎 Essai UUID connus...');
+        for (const svcUuid of KNOWN_SERVICES) {
+          try {
+            const svc = await server.getPrimaryService(svcUuid);
+            for (const charUuid of KNOWN_CHARS) {
+              try {
+                const c = await svc.getCharacteristic(charUuid);
+                if (c.properties.write || c.properties.writeWithoutResponse) {
+                  bleChar = c;
+                  console.log('[BLE] ✅ Match UUID connu:', svcUuid, charUuid);
+                  break;
+                }
+              } catch(e) {}
+            }
+            if (bleChar) break;
+          } catch(e) {}
+        }
+      }
+
+      if (!bleChar) {
+        showToast('❌ Caractéristique écriture non trouvée — voir console');
+        logStatus('❌ Char introuvable — imprimante incompatible ?');
+        return;
+      }
 
       printerConnected = true;
       document.getElementById('statusDot').classList.add('connected');
-      document.getElementById('statusText').textContent = `✓ ${bleDevice.name || 'Imprimante'}`;
+      logStatus(`✓ ${bleDevice.name || 'Imprimante'} connectée`);
       showToast('✅ Imprimante connectée !');
+
     } catch(e) {
-      if (e.name === 'NotFoundError') return; // user cancelled
-      console.error(e);
-      showToast('❌ Erreur: ' + e.message);
+      if (e.name === 'NotFoundError') { logStatus('IMPRIMANTE NON CONNECTÉE'); return; }
+      console.error('[BLE] Erreur:', e);
+      showToast('❌ ' + e.message);
+      logStatus('❌ ' + e.message);
     }
   }
 
@@ -932,7 +1003,7 @@
     printerConnected = false;
     bleChar = null;
     document.getElementById('statusDot').classList.remove('connected');
-    document.getElementById('statusText').textContent = 'IMPRIMANTE DÉCONNECTÉE';
+    logStatus('IMPRIMANTE DÉCONNECTÉE');
     showToast('⚠ Imprimante déconnectée');
   }
 
