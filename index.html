@@ -480,17 +480,17 @@
     border-top: 1px solid #eee;
   }
 
-  .lbl-barcode {
+  .lbl-logo {
     display: flex;
-    gap: 1px;
-    align-items: flex-end;
-    height: 18px;
+    align-items: center;
+    height: 20px;
   }
 
-  .lbl-barcode span {
-    display: block;
-    background: #333;
-    width: 2px;
+  .lbl-logo img {
+    height: 18px;
+    width: auto;
+    object-fit: contain;
+    filter: grayscale(100%) brightness(0); /* logo en noir sur étiquette blanche */
   }
 
   .lbl-serial {
@@ -779,8 +779,17 @@
 
         <!-- Bas de l'étiquette -->
         <div class="lbl-bottom">
-          <div class="lbl-barcode" id="prevBarcode"></div>
-          <div class="lbl-serial" id="prevSerial">CT221B • 50×30</div>
+          <div class="lbl-logo">
+            <img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <!-- Fallback si l'image ne charge pas -->
+            <div style="display:none;align-items:center;gap:4px;">
+              <div style="width:18px;height:18px;background:#111;border-radius:2px;display:flex;align-items:center;justify-content:center;">
+                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:9px;color:#fff;">LV</span>
+              </div>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:#222;letter-spacing:1.5px;text-transform:uppercase;">LuxVisual</span>
+            </div>
+          </div>
+          <div class="lbl-serial" id="prevSerial">50×30mm</div>
         </div>
       </div>
 
@@ -822,18 +831,6 @@
   let history = [];
   let printerConnected = false;
 
-  // ——— BARCODE DÉCORATIF ———
-  function generateBarcode() {
-    const bc = document.getElementById('prevBarcode');
-    bc.innerHTML = '';
-    const heights = [14,10,14,8,12,14,10,14,8,10,14,12,8,14,10,14,12,10,14,8];
-    heights.forEach(h => {
-      const bar = document.createElement('span');
-      bar.style.height = h + 'px';
-      bc.appendChild(bar);
-    });
-  }
-
   // ——— UPDATE PREVIEW ———
   function updatePreview() {
     const mat = document.getElementById('matiere').value.toUpperCase() || 'MATIÈRE';
@@ -863,8 +860,6 @@
     document.getElementById('prevDivider').style.display = showJob ? 'block' : 'none';
     document.getElementById('prevJobName').textContent = jName || '—';
     document.getElementById('prevJobNum').textContent = jNum || '—';
-
-    generateBarcode();
   }
 
   // ——— PRESET ———
@@ -1137,14 +1132,17 @@
         .mat{font-size:18pt;font-weight:900;color:#111;line-height:1;text-transform:uppercase;}
         .ep{font-family:'Share Tech Mono',monospace;font-size:10pt;color:#333;margin-top:.5mm;}
         .dims{font-family:'Barlow Condensed',sans-serif;font-size:10pt;font-weight:700;color:#111;background:#f0f0f0;padding:0 1.5mm;margin-top:.8mm;display:inline-block;}
-        .foot{margin-top:auto;font-family:'Share Tech Mono',monospace;font-size:5.5pt;color:#aaa;border-top:.3mm solid #eee;padding-top:.8mm;}
+        .foot{margin-top:auto;border-top:.3mm solid #eee;padding-top:.8mm;display:flex;align-items:center;}
+        .foot img{height:10pt;width:auto;filter:grayscale(100%) brightness(0);}
       </style></head><body>
       <div class="lbl">
         ${(jName||jNum)?`<div class="job"><span>${jName.toUpperCase()}</span><span>${jNum.toUpperCase()}</span></div>`:''}
         <div class="mat">${mat.toUpperCase()}</div>
         ${ep ? `<div class="ep">ép. ${ep} ${unite}</div>` : ''}
         ${(h||lon) ? `<div class="dims">${h?'H:'+h:''} ${lon?'× L:'+lon:''} ${ud}</div>` : ''}
-        <div class="foot">CT221B • 50×30mm</div>
+        <div class="foot">
+          <img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual">
+        </div>
       </div>
       </body></html>
     `);
@@ -1192,7 +1190,6 @@
   }
 
   // Init
-  generateBarcode();
   updatePreview();
 </script>
 </body>
