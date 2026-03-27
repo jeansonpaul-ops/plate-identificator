@@ -80,8 +80,13 @@ input:focus,select:focus{border-color:var(--accent);}
 .preview-hint{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;}
 
 /* Étiquettes preview */
-.lbl30{width:340px;height:204px;background:#fff;border:2px solid #333;border-radius:2px;display:flex;flex-direction:column;padding:8px 12px 6px;box-shadow:0 6px 24px rgba(0,0,0,.15);}
-.lbl80{width:240px;height:384px;background:#fff;border:2px solid #333;border-radius:2px;display:flex;flex-direction:column;padding:10px 12px 8px;box-shadow:0 6px 24px rgba(0,0,0,.15);}
+.lbl30{width:340px;height:204px;background:#fff;border:2px solid #333;border-radius:2px;display:flex;flex-direction:column;padding:0;box-shadow:0 6px 24px rgba(0,0,0,.15);overflow:hidden;}
+/* 80x50mm paysage — ratio 8:5 → 384x240px */
+.lbl80{width:384px;height:240px;background:#fff;border:2px solid #333;border-radius:2px;display:flex;flex-direction:column;padding:0;box-shadow:0 6px 24px rgba(0,0,0,.15);overflow:hidden;}
+/* Bande couleur famille en haut de l'étiquette */
+.lbl-color-band{height:8px;width:100%;flex-shrink:0;}
+.lbl-content{flex:1;display:flex;flex-direction:column;padding:6px 12px 5px;}
+.lbl80 .lbl-content{padding:8px 14px 7px;}
 .lbl-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;}
 .lbl-job-name{font-family:var(--sans);font-weight:700;font-size:15px;color:#222;text-transform:uppercase;}
 .lbl-job-num{font-family:var(--mono);font-size:13px;color:#444;background:#f0f0f0;padding:2px 7px;border-radius:2px;}
@@ -195,8 +200,8 @@ input:focus,select:focus{border-color:var(--accent);}
           <div class="format-opt-sub">mm — horizontal</div>
         </div>
         <div class="format-opt" id="fmt-80" onclick="setFormat(80)">
-          <div class="format-opt-label">50 × 80</div>
-          <div class="format-opt-sub">mm — vertical</div>
+          <div class="format-opt-label">80 × 50</div>
+          <div class="format-opt-sub">mm — paysage</div>
         </div>
       </div>
     </div>
@@ -243,6 +248,14 @@ input:focus,select:focus{border-color:var(--accent);}
     </div>
 
     <div>
+      <div class="section-title">Couleur de la matière</div>
+      <div class="field">
+        <label>COULEUR / FINITION</label>
+        <input type="text" id="couleur" placeholder="ex: Blanc, RAL 9016, Brossé..." oninput="updatePreview()">
+      </div>
+    </div>
+
+    <div>
       <div class="section-title">Job</div>
       <div class="toggle-row" onclick="toggleJob()">
         <div class="toggle" id="jobToggle"></div>
@@ -277,37 +290,45 @@ input:focus,select:focus{border-color:var(--accent);}
 
       <!-- 50x30 -->
       <div class="lbl30" id="lbl30">
-        <div class="lbl-top" id="p30-job" style="display:none">
-          <span class="lbl-job-name" id="p30-jn"></span>
-          <span class="lbl-job-num" id="p30-jnum"></span>
-        </div>
-        <div class="lbl-divider" id="p30-div" style="display:none"></div>
-        <div class="lbl-main">
-          <div class="lbl-mat" id="p30-mat" style="font-size:34px;">MATIÈRE</div>
-          <div class="lbl-ep" id="p30-ep" style="font-size:17px;">— mm</div>
-          <div class="lbl-dim"><span class="lbl-dim-badge" id="p30-dim" style="font-size:16px;">H × L</span></div>
-        </div>
-        <div class="lbl-bottom">
-          <div class="lbl-logo"><img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:var(--sans);font-weight:900;font-size:11px;\'>LuxVisual</span>'"></div>
-          <div class="lbl-serial">50×30mm</div>
+        <div class="lbl-color-band" id="p30-band"></div>
+        <div class="lbl-content">
+          <div class="lbl-top" id="p30-job" style="display:none">
+            <span class="lbl-job-name" id="p30-jn"></span>
+            <span class="lbl-job-num" id="p30-jnum"></span>
+          </div>
+          <div class="lbl-divider" id="p30-div" style="display:none"></div>
+          <div class="lbl-main">
+            <div class="lbl-mat" id="p30-mat" style="font-size:34px;">MATIÈRE</div>
+            <div class="lbl-ep" id="p30-ep" style="font-size:17px;">— mm</div>
+            <div class="lbl-ep" id="p30-col" style="font-size:13px;color:#555;margin-top:1px;display:none;"></div>
+            <div class="lbl-dim"><span class="lbl-dim-badge" id="p30-dim" style="font-size:16px;">H × L</span></div>
+          </div>
+          <div class="lbl-bottom">
+            <div class="lbl-logo"><img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:var(--sans);font-weight:900;font-size:11px;\'>LuxVisual</span>'"></div>
+            <div class="lbl-serial">50×30mm</div>
+          </div>
         </div>
       </div>
 
-      <!-- 50x80 -->
+      <!-- 80x50mm paysage -->
       <div class="lbl80" id="lbl80" style="display:none">
-        <div class="lbl-top" id="p80-job" style="display:none">
-          <span class="lbl-job-name" id="p80-jn"></span>
-          <span class="lbl-job-num" id="p80-jnum"></span>
-        </div>
-        <div class="lbl-divider" id="p80-div" style="display:none"></div>
-        <div class="lbl-main" style="gap:8px;">
-          <div class="lbl-mat" id="p80-mat" style="font-size:38px;">MATIÈRE</div>
-          <div class="lbl-ep" id="p80-ep" style="font-size:22px;margin-top:8px;">— mm</div>
-          <div class="lbl-dim" style="margin-top:10px;"><span class="lbl-dim-badge" id="p80-dim" style="font-size:20px;padding:4px 12px;">H × L</span></div>
-        </div>
-        <div class="lbl-bottom">
-          <div class="lbl-logo"><img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:var(--sans);font-weight:900;font-size:11px;\'>LuxVisual</span>'"></div>
-          <div class="lbl-serial">50×80mm</div>
+        <div class="lbl-color-band" id="p80-band"></div>
+        <div class="lbl-content">
+          <div class="lbl-top" id="p80-job" style="display:none">
+            <span class="lbl-job-name" id="p80-jn"></span>
+            <span class="lbl-job-num" id="p80-jnum"></span>
+          </div>
+          <div class="lbl-divider" id="p80-div" style="display:none"></div>
+          <div class="lbl-main" style="gap:6px;">
+            <div class="lbl-mat" id="p80-mat" style="font-size:42px;">MATIÈRE</div>
+            <div class="lbl-ep" id="p80-ep" style="font-size:20px;margin-top:4px;">— mm</div>
+            <div class="lbl-ep" id="p80-col" style="font-size:15px;color:#555;margin-top:0px;display:none;"></div>
+            <div class="lbl-dim" style="margin-top:6px;"><span class="lbl-dim-badge" id="p80-dim" style="font-size:18px;padding:3px 10px;">H × L</span></div>
+          </div>
+          <div class="lbl-bottom">
+            <div class="lbl-logo"><img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:var(--sans);font-weight:900;font-size:11px;\'>LuxVisual</span>'"></div>
+            <div class="lbl-serial">80×50mm</div>
+          </div>
         </div>
       </div>
     </div>
@@ -400,6 +421,28 @@ let currentFormat=30, currentFamily='';
 let hist = JSON.parse(localStorage.getItem('pi_hist')||'[]');
 let stock = JSON.parse(localStorage.getItem('pi_stock')||'[]');
 
+// ── COULEURS PAR FAMILLE ──
+const FAMILY_COLORS = {
+  'Dibond':              '#2563eb', // bleu
+  'PVC':                 '#16a34a', // vert
+  'MDF':                 '#92400e', // brun
+  'Plexiglass':          '#0891b2', // cyan
+  'Beelite':             '#7c3aed', // violet
+  'Polypro Alvéolaire':  '#ea580c', // orange
+  'Carton E-Golf':       '#65a30d', // vert olive
+  'Palboard':            '#db2777', // rose
+  'Papier':              '#6b7280', // gris
+};
+const COLOR_PALETTE = ['#e11d48','#ea580c','#d97706','#16a34a','#0891b2','#2563eb','#7c3aed','#db2777','#0f766e','#65a30d','#92400e','#6b7280'];
+
+function getFamilyColor(name) {
+  if (FAMILY_COLORS[name]) return FAMILY_COLORS[name];
+  // Couleur déterministe pour les nouvelles familles
+  let hash = 0;
+  for (let i=0;i<name.length;i++) hash=(hash*31+name.charCodeAt(i))&0xffffffff;
+  return COLOR_PALETTE[Math.abs(hash) % COLOR_PALETTE.length];
+}
+
 // ── TABS ──
 function switchTab(t) {
   document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(t==='label'&&i===0)||(t==='stock'&&i===1)));
@@ -415,7 +458,7 @@ function setFormat(h) {
   document.getElementById('fmt-80').classList.toggle('active',h===80);
   document.getElementById('lbl30').style.display=h===30?'':'none';
   document.getElementById('lbl80').style.display=h===80?'':'none';
-  document.getElementById('previewHint').textContent=`APERÇU — 50 × ${h} mm`;
+  document.getElementById('previewHint').textContent=h===30?'APERÇU — 50 × 30 mm':'APERÇU — 80 × 50 mm (paysage)';
   updatePreview();
 }
 
@@ -424,6 +467,7 @@ function updatePreview() {
   const mat=document.getElementById('matiere').value.toUpperCase()||'MATIÈRE';
   const ep=document.getElementById('epaisseur').value;
   const unite=document.getElementById('unite').value;
+  const couleur=document.getElementById('couleur').value;
   const h=document.getElementById('dimH').value;
   const lon=document.getElementById('dimLon').value;
   const ud=document.getElementById('uniteD').value;
@@ -432,18 +476,30 @@ function updatePreview() {
   const p=currentFormat===30?'p30':'p80';
   const showJob=jobEnabled&&(jn||jnum);
 
-  const base=currentFormat===30?34:38;
+  // Couleur famille
+  const rawMat=document.getElementById('matiere').value;
+  const col=rawMat?getFamilyColor(rawMat.charAt(0).toUpperCase()+rawMat.slice(1)):'#e0e0e0';
+  document.getElementById('p30-band').style.background=col;
+  document.getElementById('p80-band').style.background=col;
+
+  const base=currentFormat===30?34:42;
   const fs=mat.length>16?base-10:mat.length>12?base-6:mat.length>8?base-2:base;
   document.getElementById(p+'-mat').style.fontSize=fs+'px';
   document.getElementById(p+'-mat').textContent=mat;
   document.getElementById(p+'-ep').textContent=ep?`${ep} ${unite}`:`— ${unite}`;
-  document.getElementById(p+'-ep').style.fontSize=currentFormat===30?'17px':'22px';
+  document.getElementById(p+'-ep').style.fontSize=currentFormat===30?'17px':'20px';
+
+  // Couleur matière
+  const colEl=document.getElementById(p+'-col');
+  if(couleur){colEl.textContent='◼ '+couleur.toUpperCase();colEl.style.display='';}
+  else{colEl.style.display='none';}
+
   let dim='';
   if(h) dim+=`H:${h}`;
   if(lon) dim+=(dim?' × ':'')+`L:${lon}`;
   if(dim) dim+=` ${ud}`;
   document.getElementById(p+'-dim').textContent=dim||'H × L';
-  document.getElementById(p+'-dim').style.fontSize=currentFormat===30?'16px':'20px';
+  document.getElementById(p+'-dim').style.fontSize=currentFormat===30?'16px':'18px';
   document.getElementById(p+'-job').style.display=showJob?'flex':'none';
   document.getElementById(p+'-div').style.display=showJob?'block':'none';
   document.getElementById(p+'-jn').textContent=jn;
@@ -451,8 +507,12 @@ function updatePreview() {
 }
 
 function setPreset(btn,val) {
-  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.preset-btn').forEach(b=>{b.classList.remove('active');b.style.background='';b.style.borderColor='';b.style.color='';});
   btn.classList.add('active');
+  const col=getFamilyColor(val.charAt(0).toUpperCase()+val.slice(1).toLowerCase());
+  btn.style.background=col;
+  btn.style.borderColor=col;
+  btn.style.color='#fff';
   document.getElementById('matiere').value=val;
   updatePreview();
 }
@@ -509,61 +569,71 @@ async function bleWrite(data) {
 }
 
 // ── TSC (polices intégrées) ──
+// 50x30 : WIDTH=50mm HEIGHT=30mm → 400x240 dots
+// 80x50 paysage : on déclare SIZE 80mm,50mm DIRECTION 1 (rotation 90°)
+//   → l'imprimante tourne le contenu — zone utile 640x400 dots
 // Polices : "0"=8x8 "1"=12x20 "2"=16x24 "3"=20x28 "4"=24x32 "5"=32x48
-function buildTSC(mat,ep,unite,h,lon,ud,jn,jnum,qty,fmt) {
-  const dotH=fmt*8; // dots hauteur (203dpi)
+function buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,qty,fmt) {
   const MX=8;
   let y=4, c='';
-  c+=`SIZE 50 mm,${fmt} mm\r\n`;
-  c+=`GAP 3 mm,0 mm\r\n`;
-  c+=`DIRECTION 0,0\r\n`;
-  c+=`REFERENCE 0,0\r\n`;
-  c+=`OFFSET 0 mm\r\n`;
-  c+=`CLS\r\n`;
 
-  // JOB
-  if(jn||jnum){
-    if(jn) c+=`TEXT ${MX},${y},"2",0,1,1,"${jn.substring(0,18).toUpperCase()}"\r\n`;
-    if(jnum) c+=`TEXT ${jn?210:MX},${y},"2",0,1,1,"${jnum.substring(0,10).toUpperCase()}"\r\n`;
-    y+=26; c+=`BAR ${MX},${y},384,1\r\n`; y+=5;
+  if(fmt===30){
+    // ── FORMAT 50x30mm ──
+    c+=`SIZE 50 mm,30 mm\r\n`;
+    c+=`GAP 3 mm,0 mm\r\n`;
+    c+=`DIRECTION 0,0\r\n`;
+    c+=`REFERENCE 0,0\r\n`;
+    c+=`OFFSET 0 mm\r\n`;
+    c+=`CLS\r\n`;
+    const dotH=240;
+    if(jn||jnum){
+      if(jn) c+=`TEXT ${MX},${y},"2",0,1,1,"${jn.substring(0,18).toUpperCase()}"\r\n`;
+      if(jnum) c+=`TEXT ${jn?210:MX},${y},"2",0,1,1,"${jnum.substring(0,10).toUpperCase()}"\r\n`;
+      y+=26; c+=`BAR ${MX},${y},384,1\r\n`; y+=5;
+    }
+    const ml=mat.length;
+    let mF,mM,mH;
+    if(ml<=4){mF='5';mM=2;mH=54;}else if(ml<=6){mF='5';mM=1;mH=50;}
+    else if(ml<=9){mF='4';mM=2;mH=42;}else if(ml<=13){mF='4';mM=1;mH=36;}
+    else if(ml<=17){mF='3';mM=1;mH=30;}else{mF='2';mM=1;mH=26;}
+    if((jn||jnum)&&mM>1){mM=1;mH-=10;}
+    c+=`TEXT ${MX},${y},"${mF}",0,${mM},${mM},"${mat.substring(0,20).toUpperCase()}"\r\n`; y+=mH;
+    if(ep){c+=`TEXT ${MX},${y},"3",0,1,1,"EP: ${ep} ${unite}"\r\n`;y+=30;}
+    if(couleur){c+=`TEXT ${MX},${y},"2",0,1,1,"${couleur.toUpperCase()}"\r\n`;y+=26;}
+    if(h||lon){let dim='';if(h)dim+=`H:${h}`;if(lon)dim+=(dim?' x ':'')+`L:${lon}`;if(dim)dim+=` ${ud}`;c+=`TEXT ${MX},${y},"3",0,1,1,"${dim}"\r\n`;y+=30;}
+    c+=`BAR ${MX},${dotH-22},384,1\r\n`;
+    c+=`TEXT ${MX},${dotH-19},"1",0,1,1,"LuxVisual"\r\n`;
+
+  } else {
+    // ── FORMAT 80x50mm PAYSAGE — SIZE 80,50 + DIRECTION 1 ──
+    // DIRECTION 1 = impression en paysage (rotation 90°)
+    // Zone utile : 640 dots (80mm) de large, 400 dots (50mm) de haut
+    c+=`SIZE 80 mm,50 mm\r\n`;
+    c+=`GAP 3 mm,0 mm\r\n`;
+    c+=`DIRECTION 1,0\r\n`;
+    c+=`REFERENCE 0,0\r\n`;
+    c+=`OFFSET 0 mm\r\n`;
+    c+=`CLS\r\n`;
+    const dotW=640, dotH=400;
+    if(jn||jnum){
+      if(jn) c+=`TEXT ${MX},${y},"3",0,1,1,"${jn.substring(0,22).toUpperCase()}"\r\n`;
+      if(jnum) c+=`TEXT ${jn?380:MX},${y},"3",0,1,1,"${jnum.substring(0,12).toUpperCase()}"\r\n`;
+      y+=32; c+=`BAR ${MX},${y},${dotW-MX*2},1\r\n`; y+=6;
+    }
+    const ml=mat.length;
+    let mF,mM,mH;
+    if(ml<=4){mF='5';mM=3;mH=90;}else if(ml<=6){mF='5';mM=2;mH=76;}
+    else if(ml<=9){mF='5';mM=1;mH=58;}else if(ml<=13){mF='4';mM=2;mH=50;}
+    else if(ml<=17){mF='4';mM=1;mH=40;}else{mF='3';mM=1;mH=32;}
+    if((jn||jnum)&&mM>1){mM=Math.max(1,mM-1);mH-=14;}
+    c+=`TEXT ${MX},${y},"${mF}",0,${mM},${mM},"${mat.substring(0,24).toUpperCase()}"\r\n`; y+=mH;
+    if(ep){c+=`TEXT ${MX},${y},"4",0,1,1,"EP: ${ep} ${unite}"\r\n`;y+=40;}
+    if(couleur){c+=`TEXT ${MX},${y},"3",0,1,1,"${couleur.toUpperCase()}"\r\n`;y+=32;}
+    if(h||lon){let dim='';if(h)dim+=`H:${h}`;if(lon)dim+=(dim?' x ':'')+`L:${lon}`;if(dim)dim+=` ${ud}`;c+=`TEXT ${MX},${y},"4",0,1,1,"${dim}"\r\n`;y+=40;}
+    c+=`BAR ${MX},${dotH-26},${dotW-MX*2},1\r\n`;
+    c+=`TEXT ${MX},${dotH-23},"2",0,1,1,"LuxVisual"\r\n`;
   }
 
-  // MATIÈRE — taille selon longueur et format
-  const ml=mat.length;
-  let mF,mM,mH;
-  const big=fmt===80;
-  if(ml<=4) {mF='5';mM=big?3:2;mH=big?80:54;}
-  else if(ml<=6) {mF='5';mM=big?2:1;mH=big?66:50;}
-  else if(ml<=9) {mF='4';mM=big?2:2;mH=big?54:42;}
-  else if(ml<=13){mF='4';mM=big?2:1;mH=big?48:36;}
-  else if(ml<=17){mF='3';mM=big?2:1;mH=big?42:30;}
-  else {mF='2';mM=1;mH=big?32:26;}
-  if((jn||jnum)&&mM>1){mM=1;mH-=12;}
-  c+=`TEXT ${MX},${y},"${mF}",0,${mM},${mM},"${mat.substring(0,20).toUpperCase()}"\r\n`;
-  y+=mH;
-
-  // ÉPAISSEUR
-  if(ep){
-    const f=big?'4':'3'; const dh=big?38:30;
-    c+=`TEXT ${MX},${y},"${f}",0,1,1,"EP: ${ep} ${unite}"\r\n`;
-    y+=dh;
-  }
-
-  // DIMENSIONS
-  if(h||lon){
-    let dim='';
-    if(h) dim+=`H:${h}`;
-    if(lon) dim+=(dim?' x ':'')+`L:${lon}`;
-    if(dim) dim+=` ${ud}`;
-    const f=big?'4':'3'; const dh=big?38:30;
-    c+=`TEXT ${MX},${y},"${f}",0,1,1,"${dim}"\r\n`;
-    y+=dh;
-  }
-
-  // PIED
-  const fy=dotH-22;
-  c+=`BAR ${MX},${fy},384,1\r\n`;
-  c+=`TEXT ${MX},${fy+3},"1",0,1,1,"LuxVisual"\r\n`;
   c+=`PRINT ${qty},1\r\n`;
   return c;
 }
@@ -573,6 +643,7 @@ async function printLabel() {
   if(!mat){showToast('⚠ Entrez le nom de la matière');return;}
   const ep=document.getElementById('epaisseur').value;
   const unite=document.getElementById('unite').value;
+  const couleur=document.getElementById('couleur').value;
   const h=document.getElementById('dimH').value;
   const lon=document.getElementById('dimLon').value;
   const ud=document.getElementById('uniteD').value;
@@ -582,7 +653,7 @@ async function printLabel() {
   if(!printerConnected||!bleChar){showToast('⚠ Connectez l\'imprimante');return;}
   try {
     showToast(`🖨 Envoi × ${copies}...`);
-    const tsc=buildTSC(mat,ep,unite,h,lon,ud,jn,jnum,copies,currentFormat);
+    const tsc=buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,copies,currentFormat);
     await bleWrite(new TextEncoder().encode(tsc));
     showToast(`✅ ${copies} étiquette(s) !`);
   } catch(e){showToast('❌ '+e.message);}
@@ -591,26 +662,34 @@ async function printLabel() {
 function previewPrint() {
   const mat=document.getElementById('matiere').value||'MATIÈRE';
   const ep=document.getElementById('epaisseur').value, unite=document.getElementById('unite').value;
+  const couleur=document.getElementById('couleur').value;
   const h=document.getElementById('dimH').value, lon=document.getElementById('dimLon').value, ud=document.getElementById('uniteD').value;
   const jn=jobEnabled?document.getElementById('jobName').value:'';
   const jnum=jobEnabled?document.getElementById('jobNum').value:'';
   const fmt=currentFormat;
-  const win=window.open('','_blank',`width=${50*5+60},height=${fmt*5+60}`);
+  const win=window.open('','_blank',`width=${fmt===30?320:480},height=${fmt===30?250:320}`);
   win.document.write(`<html><head><title>Aperçu</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>body{margin:0;padding:6mm;background:#bbb;display:flex;align-items:center;justify-content:center;min-height:100vh;}
-  .l{width:50mm;height:${fmt}mm;background:#fff;padding:2.5mm 3mm;box-sizing:border-box;border:1px solid #999;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,.2);}
-  .job{font-family:'Barlow Condensed',sans-serif;font-size:9pt;font-weight:700;display:flex;justify-content:space-between;border-bottom:.3mm solid #ccc;padding-bottom:1mm;margin-bottom:1mm;}
-  .mat{font-family:'Barlow Condensed',sans-serif;font-size:${fmt===80?'22':'16'}pt;font-weight:900;text-transform:uppercase;line-height:1.05;}
-  .ep{font-family:'Share Tech Mono',monospace;font-size:${fmt===80?'13':'10'}pt;color:#222;margin-top:1.5mm;}
-  .dim{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:${fmt===80?'13':'10'}pt;background:#f0f0f0;padding:.5mm 2mm;margin-top:1.5mm;display:inline-block;}
-  .foot{margin-top:auto;font-family:'Barlow Condensed',sans-serif;font-size:7pt;font-weight:700;border-top:.3mm solid #eee;padding-top:1mm;}
+  .l{width:${fmt===30?'50':'80'}mm;height:${fmt===30?'30':'50'}mm;background:#fff;box-sizing:border-box;border:1px solid #999;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,.2);overflow:hidden;}
+  .band{height:3mm;width:100%;flex-shrink:0;}
+  .inner{flex:1;padding:1.5mm 3mm 1.5mm;display:flex;flex-direction:column;}
+  .job{font-family:'Barlow Condensed',sans-serif;font-size:${fmt===30?'8':'9'}pt;font-weight:700;display:flex;justify-content:space-between;border-bottom:.3mm solid #ccc;padding-bottom:.8mm;margin-bottom:.8mm;}
+  .mat{font-family:'Barlow Condensed',sans-serif;font-size:${fmt===30?'16':'20'}pt;font-weight:900;text-transform:uppercase;line-height:1.05;}
+  .ep{font-family:'Share Tech Mono',monospace;font-size:${fmt===30?'9':'11'}pt;color:#222;margin-top:.5mm;}
+  .col{font-family:'Share Tech Mono',monospace;font-size:${fmt===30?'8':'10'}pt;color:#555;margin-top:.3mm;}
+  .dim{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:${fmt===30?'10':'12'}pt;background:#f0f0f0;padding:.3mm 2mm;margin-top:1mm;display:inline-block;}
+  .foot{margin-top:auto;font-family:'Barlow Condensed',sans-serif;font-size:7pt;font-weight:700;border-top:.3mm solid #eee;padding-top:.8mm;}
   </style></head><body><div class="l">
+  <div class="band" style="background:${document.getElementById('p30-band').style.background||'#ccc'}"></div>
+  <div class="inner">
   ${(jn||jnum)?`<div class="job"><span>${jn.toUpperCase()}</span><span>${jnum.toUpperCase()}</span></div>`:''}
   <div class="mat">${mat.toUpperCase()}</div>
   ${ep?`<div class="ep">EP: ${ep} ${unite}</div>`:''}
+  ${couleur?`<div class="col">◼ ${couleur.toUpperCase()}</div>`:''}
   ${(h||lon)?`<div class="dim">${h?'H:'+h:''} ${lon?'× L:'+lon:''} ${ud}</div>`:''}
-  <div class="foot">LuxVisual</div></div></body></html>`);
+  <div class="foot">LuxVisual</div>
+  </div></div></body></html>`);
   win.document.close();
   addToHist(mat,ep,unite);
 }
@@ -655,9 +734,15 @@ function renderStock() {
   const fl=document.getElementById('familiesList');
   fl.innerHTML=`<div class="family-item ${!currentFamily?'active':''}" onclick="selectFamily('')">
     <span class="family-name">Toutes</span><span class="family-count">${stock.length}</span></div>`+
-    Object.entries(fams).sort(([a],[b])=>a.localeCompare(b)).map(([n,cnt])=>`
-    <div class="family-item ${currentFamily===n?'active':''}" onclick="selectFamily('${n}')">
-      <span class="family-name">${n}</span><span class="family-count">${cnt}</span></div>`).join('');
+    Object.entries(fams).sort(([a],[b])=>a.localeCompare(b)).map(([n,cnt])=>{
+      const col=getFamilyColor(n);
+      return `<div class="family-item ${currentFamily===n?'active':''}" onclick="selectFamily('${n}')" style="border-left-color:${col}${currentFamily===n?'':';border-left-color:'+col}">
+        <span class="family-name" style="display:flex;align-items:center;gap:7px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:${col};flex-shrink:0;display:inline-block;"></span>${n}
+        </span>
+        <span class="family-count" style="${currentFamily===n?'background:'+col:''}">${cnt}</span>
+      </div>`;
+    }).join('');
 
   // Plaques filtrées
   let plates=stock;
@@ -682,15 +767,18 @@ function renderStock() {
     const empty=p.qty===0;
     const low=p.qty>0&&p.qty<=p.seuil;
     const qc=empty?'empty':low?'low':'ok';
-    const stripe=empty?'var(--red)':low?'#f59e0b':'var(--green)';
+    const famColor=getFamilyColor(p.famille);
+    // Stripe gauche = couleur famille ; indicateur stock à droite du compteur
     let dim='';
     if(p.h) dim+=`H:${p.h}`;
     if(p.l) dim+=(dim?' × ':'')+`L:${p.l}`;
     if(dim) dim+=` mm`;
-    return `<div class="plate-card">
-      <div class="plate-stripe" style="background:${stripe}"></div>
+    return `<div class="plate-card" style="border-left:4px solid ${famColor};">
+      <div style="width:36px;height:36px;border-radius:6px;background:${famColor}18;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="font-family:var(--sans);font-weight:900;font-size:13px;color:${famColor};">${p.famille.substring(0,2).toUpperCase()}</span>
+      </div>
       <div class="plate-info">
-        <div class="plate-mat">${p.famille}</div>
+        <div class="plate-mat" style="color:${famColor};">${p.famille}</div>
         <div class="plate-detail">ép. ${p.ep} ${p.unite}${p.seuil?' · alerte ≤ '+p.seuil:''}</div>
         ${dim?`<div class="plate-dims">${dim}</div>`:''}
       </div>
@@ -700,7 +788,7 @@ function renderStock() {
         <button class="s-btn p" onclick="adj('${p.id}',+1)">+</button>
       </div>
       <div class="plate-btns">
-        <button class="pb pb-print" onclick="printFromStock('${p.id}')">🖨 Étiquette</button>
+        <button class="pb pb-print" onclick="printFromStock('${p.id}')" style="background:${famColor};">🖨 Étiquette</button>
         <button class="pb pb-del" onclick="delPlate('${p.id}')">✕</button>
       </div>
     </div>`;
