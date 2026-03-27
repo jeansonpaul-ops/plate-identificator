@@ -6,732 +6,254 @@
 <title>Plate Identificator — CT221B</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f0f2f5;
-    --surface: #ffffff;
-    --surface2: #f5f6f8;
-    --border: #dde1e8;
-    --accent: #e8920a;
-    --accent2: #c97a00;
-    --text: #1a1d24;
-    --text-muted: #7a8099;
-    --green: #16a34a;
-    --red: #dc2626;
-    --label-bg: #ffffff;
-    --label-border: #333;
-    --mono: 'Share Tech Mono', monospace;
-    --sans: 'Barlow Condensed', sans-serif;
-    --body: 'Barlow', sans-serif;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--body);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* HEADER */
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 32px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-
-  .logo {
-    font-family: var(--sans);
-    font-weight: 900;
-    font-size: 22px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .logo span {
-    color: var(--text-muted);
-    font-weight: 300;
-  }
-
-  .printer-status {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--red);
-    animation: pulse 2s infinite;
-  }
-  .status-dot.connected { background: var(--green); }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  /* LAYOUT */
-  .app {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 0;
-  }
-
-  /* PANEL GAUCHE */
-  .panel {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 28px 24px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .section-title {
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-  }
-
-  .field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-  }
-
-  input, select, textarea {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 14px;
-    font-family: var(--mono);
-    font-size: 13px;
-    border-radius: 4px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.12);
-  }
-
-  select option { background: var(--surface2); }
-
-  .row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  /* TOGGLE JOB */
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .toggle {
-    width: 38px; height: 20px;
-    background: var(--border);
-    border-radius: 10px;
-    position: relative;
-    transition: background 0.2s;
-    flex-shrink: 0;
-  }
-
-  .toggle::after {
-    content: '';
-    width: 14px; height: 14px;
-    background: #fff;
-    border-radius: 50%;
-    position: absolute;
-    top: 3px; left: 3px;
-    transition: transform 0.2s;
-  }
-
-  .toggle.on { background: var(--accent); }
-  .toggle.on::after { transform: translateX(18px); }
-
-  .toggle-label {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .job-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease;
-  }
-
-  .job-fields.visible { max-height: 200px; }
-
-  /* PRESET MATIÈRES */
-  .presets {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .preset-btn {
-    font-family: var(--mono);
-    font-size: 11px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    padding: 5px 10px;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .preset-btn:hover, .preset-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #000;
-  }
-
-  /* ACTIONS */
-  .actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: auto;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-  }
-
-  .btn {
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border: none;
-    padding: 13px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #000;
-  }
-
-  .btn-primary:hover {
-    background: #ffc04d;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(245,166,35,0.35);
-  }
-
-  .btn-secondary {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-
-  .btn-secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .btn-connect {
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    font-size: 12px;
-    padding: 9px;
-  }
-
-  .btn-connect:hover { border-color: var(--green); color: var(--green); }
-
-  /* COPIES */
-  .copies-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .copies-row label { min-width: fit-content; margin-bottom: 0; }
-
-  .qty-ctrl {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .qty-btn {
-    background: var(--surface2);
-    border: none;
-    color: var(--text);
-    width: 32px; height: 36px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background 0.15s;
-  }
-
-  .qty-btn:hover { background: var(--border); }
-
-  .qty-val {
-    background: var(--bg);
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 14px;
-    width: 44px;
-    text-align: center;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    outline: none;
-  }
-
-  /* PANNEAU DROIT — PREVIEW */
-  .preview-pane {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    gap: 32px;
-    position: relative;
-    background: repeating-linear-gradient(
-      45deg,
-      #e8eaef,
-      #e8eaef 10px,
-      #dde0e8 10px,
-      #dde0e8 20px
-    );
-  }
-
-  .preview-label-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .preview-hint {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-  }
-
-  /* ÉTIQUETTE 50x30mm — ratio: 5:3 */
-  .label-preview {
-    width: 400px;
-    height: 240px;
-    background: var(--label-bg);
-    border: 2px solid var(--label-border);
-    border-radius: 2px;
-    display: flex;
-    flex-direction: column;
-    padding: 10px 14px 8px;
-    position: relative;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 0 0 8px rgba(0,0,0,0.04);
-    overflow: hidden;
-    transition: all 0.2s;
-  }
-
-  .label-preview::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: #222;
-  }
-
-  /* Contenu étiquette */
-  .lbl-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 4px;
-  }
-
-  .lbl-job-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    color: #222;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .lbl-job-num {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    color: #444;
-    background: #f0f0f0;
-    padding: 2px 8px;
-    border-radius: 2px;
-  }
-
-  .lbl-divider {
-    height: 1px;
-    background: #ddd;
-    margin: 4px 0;
-  }
-
-  .lbl-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .lbl-matiere {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 28px;
-    line-height: 1;
-    color: #111;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .lbl-epaisseur {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 18px;
-    color: #444;
-    margin-top: 3px;
-    display: block;
-  }
-
-  .lbl-dimensions {
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .lbl-dim-badge {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    color: #111;
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    padding: 1px 8px;
-    border-radius: 2px;
-    letter-spacing: 0.5px;
-  }
-
-  .lbl-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 6px;
-    padding-top: 4px;
-    border-top: 1px solid #eee;
-  }
-
-  .lbl-logo {
-    display: flex;
-    align-items: center;
-    height: 20px;
-  }
-
-  .lbl-logo img {
-    height: 18px;
-    width: auto;
-    object-fit: contain;
-    filter: grayscale(100%) brightness(0); /* logo en noir sur étiquette blanche */
-  }
-
-  .lbl-serial {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 9px;
-    color: #aaa;
-  }
-
-  /* Taille indicateur */
-  .size-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .size-ruler {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-
-  .ruler-line {
-    height: 1px;
-    background: var(--border);
-    width: 80px;
-    position: relative;
-  }
-
-  .ruler-line::before, .ruler-line::after {
-    content: '';
-    position: absolute;
-    width: 1px; height: 6px;
-    background: var(--border);
-    top: -3px;
-  }
-
-  .ruler-line::before { left: 0; }
-  .ruler-line::after { right: 0; }
-
-  /* HISTORIQUE */
-  .history-pane {
-    position: absolute;
-    bottom: 24px;
-    right: 24px;
-    width: 280px;
-  }
-
-  .history-title {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-
-  .history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 140px;
-    overflow-y: auto;
-  }
-
-  .history-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: border-color 0.15s;
-  }
-
-  .history-item:hover { border-color: var(--accent); }
-
-  .history-item-text {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .history-item-reprint {
-    font-size: 10px;
-    color: var(--accent);
-    font-family: var(--mono);
-  }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--accent);
-    color: #000;
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 1px;
-    padding: 12px 28px;
-    border-radius: 4px;
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 100;
-    pointer-events: none;
-  }
-
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* PRINT */
-  @media print {
-    body * { visibility: hidden; }
-    .print-area, .print-area * { visibility: visible; }
-    .print-area {
-      position: fixed;
-      top: 0; left: 0;
-      width: 50mm; height: 30mm;
-    }
-    .label-print {
-      width: 50mm; height: 30mm;
-      background: #fff;
-      padding: 2mm 2.5mm;
-      display: flex; flex-direction: column;
-    }
-  }
-  
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #c8cdd8; border-radius: 2px; }
+:root {
+  --bg:#f0f2f5; --surface:#fff; --surface2:#f5f6f8; --border:#dde1e8;
+  --accent:#e8920a; --text:#1a1d24; --muted:#7a8099;
+  --green:#16a34a; --red:#dc2626;
+  --mono:'Share Tech Mono',monospace; --sans:'Barlow Condensed',sans-serif; --body:'Barlow',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;display:flex;flex-direction:column;}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.logo{font-family:var(--sans);font-weight:900;font-size:20px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;}
+.logo span{color:var(--muted);font-weight:300;}
+.printer-status{margin-left:auto;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted);}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 2s infinite;}
+.status-dot.connected{background:var(--green);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.tabs{display:flex;background:var(--surface);border-bottom:2px solid var(--border);}
+.tab{font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;padding:12px 28px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+.view{display:none;flex:1;}
+.view.active{display:flex;}
+
+/* ── ÉTIQUETTE ── */
+.label-view{flex:1;display:grid;grid-template-columns:380px 1fr;}
+.panel{background:var(--surface);border-right:1px solid var(--border);padding:22px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:18px;}
+.section-title{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:5px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;}
+input,select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 11px;font-family:var(--mono);font-size:13px;border-radius:4px;outline:none;width:100%;transition:border-color .2s;}
+input:focus,select:focus{border-color:var(--accent);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+.presets{display:flex;flex-wrap:wrap;gap:5px;}
+.preset-btn{font-family:var(--mono);font-size:10px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 9px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.preset-btn:hover,.preset-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.format-selector{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.format-opt{border:2px solid var(--border);border-radius:6px;padding:8px;cursor:pointer;text-align:center;transition:all .15s;}
+.format-opt.active{border-color:var(--accent);background:#fff8ee;}
+.format-opt-label{font-family:var(--sans);font-weight:700;font-size:15px;}
+.format-opt-sub{font-family:var(--mono);font-size:9px;color:var(--muted);}
+
+.toggle-row{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+.toggle{width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .2s;}
+.toggle.on{background:var(--accent);}
+.toggle.on::after{transform:translateX(16px);}
+.toggle-label{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.job-fields{display:flex;flex-direction:column;gap:10px;overflow:hidden;max-height:0;transition:max-height .3s;}
+.job-fields.visible{max-height:200px;}
+
+.copies-row{display:flex;align-items:center;gap:8px;}
+.qty-ctrl{display:flex;align-items:center;border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.qty-btn{background:var(--surface2);border:none;color:var(--text);width:30px;height:32px;cursor:pointer;font-size:16px;transition:background .15s;}
+.qty-btn:hover{background:var(--border);}
+.qty-val{background:var(--bg);color:var(--accent);font-family:var(--mono);font-size:14px;width:38px;height:32px;display:flex;align-items:center;justify-content:center;}
+
+.actions{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding-top:14px;border-top:1px solid var(--border);}
+.btn{font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;border:none;padding:11px 16px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#d4820a;transform:translateY(-1px);}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-connect{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:11px;padding:8px;}
+.btn-connect:hover{border-color:var(--green);color:var(--green);}
+.btn-sm{font-family:var(--sans);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:6px 12px;border-radius:4px;cursor:pointer;transition:all .15s;}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+
+.preview-pane{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;gap:16px;position:relative;background:repeating-linear-gradient(45deg,#e8eaef,#e8eaef 10px,#dde0e8 10px,#dde0e8 20px);}
+.preview-hint{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;}
+
+/* Étiquettes preview */
+.lbl30{width:340px;height:204px;background:#fff;border:2px solid #333;border-radius:2px;display:flex;flex-direction:column;padding:8px 12px 6px;box-shadow:0 6px 24px rgba(0,0,0,.15);}
+.lbl80{width:240px;height:384px;background:#fff;border:2px solid #333;border-radius:2px;display:flex;flex-direction:column;padding:10px 12px 8px;box-shadow:0 6px 24px rgba(0,0,0,.15);}
+.lbl-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;}
+.lbl-job-name{font-family:var(--sans);font-weight:700;font-size:15px;color:#222;text-transform:uppercase;}
+.lbl-job-num{font-family:var(--mono);font-size:13px;color:#444;background:#f0f0f0;padding:2px 7px;border-radius:2px;}
+.lbl-divider{height:1px;background:#ccc;margin:3px 0;}
+.lbl-main{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.lbl-mat{font-family:var(--sans);font-weight:900;line-height:1;color:#111;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lbl-ep{font-family:var(--mono);color:#333;margin-top:3px;}
+.lbl-dim{margin-top:5px;}
+.lbl-dim-badge{font-family:var(--sans);font-weight:700;color:#111;background:#f0f0f0;border:1px solid #ddd;padding:2px 8px;border-radius:2px;display:inline-block;}
+.lbl-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:4px;border-top:1px solid #eee;margin-top:4px;}
+.lbl-logo img{height:13px;width:auto;filter:grayscale(100%) brightness(0);}
+.lbl-serial{font-family:var(--mono);font-size:8px;color:#bbb;}
+
+.history-pane{position:absolute;bottom:14px;right:14px;width:250px;}
+.history-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;text-transform:uppercase;}
+.history-list{display:flex;flex-direction:column;gap:4px;max-height:100px;overflow-y:auto;}
+.history-item{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:6px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;}
+.history-item:hover{border-color:var(--accent);}
+.history-item-text{font-family:var(--mono);font-size:10px;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.history-rp{font-size:9px;color:var(--accent);}
+
+/* ── STOCK ── */
+.stock-view{flex:1;display:flex;flex-direction:column;}
+.stock-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.stock-toolbar input{max-width:220px;padding:7px 11px;}
+.btn-add{background:var(--green);color:#fff;padding:8px 16px;border:none;border-radius:4px;font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.btn-add:hover{background:#14803f;}
+
+.stock-body{flex:1;display:flex;overflow:hidden;}
+.families-col{width:190px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
+.families-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;padding:10px 14px 6px;}
+.family-item{padding:9px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-left:3px solid transparent;transition:all .15s;}
+.family-item:hover{background:var(--surface2);}
+.family-item.active{background:#fff8ee;border-left-color:var(--accent);}
+.family-name{font-family:var(--sans);font-weight:700;font-size:14px;}
+.family-count{font-family:var(--mono);font-size:10px;background:var(--surface2);color:var(--muted);padding:1px 6px;border-radius:10px;}
+.family-item.active .family-count{background:var(--accent);color:#fff;}
+
+.plates-col{flex:1;overflow-y:auto;padding:14px 18px;}
+.plates-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.plates-title{font-family:var(--sans);font-weight:700;font-size:20px;}
+.plates-sub{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.plates-grid{display:flex;flex-direction:column;gap:7px;}
+
+.plate-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:12px;transition:border-color .15s;}
+.plate-card:hover{border-color:#c8cdd8;}
+.plate-stripe{width:4px;height:44px;border-radius:2px;flex-shrink:0;}
+.plate-info{flex:1;min-width:0;}
+.plate-mat{font-family:var(--sans);font-weight:900;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.plate-detail{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:1px;}
+.plate-dims{font-family:var(--mono);font-size:11px;color:var(--text);margin-top:1px;}
+
+.stock-ctrl{display:flex;align-items:center;border:1px solid var(--border);border-radius:6px;overflow:hidden;flex-shrink:0;}
+.s-btn{background:var(--surface2);border:none;width:38px;height:38px;cursor:pointer;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.s-btn.m:hover{background:#fee2e2;color:var(--red);}
+.s-btn.p:hover{background:#dcfce7;color:var(--green);}
+.s-qty{font-family:var(--mono);font-size:17px;font-weight:700;width:46px;text-align:center;background:var(--bg);}
+.s-qty.ok{color:var(--green);}
+.s-qty.low{color:#f59e0b;}
+.s-qty.empty{color:var(--red);}
+
+.plate-btns{display:flex;gap:5px;flex-shrink:0;}
+.pb{border:none;padding:7px 11px;border-radius:4px;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:11px;letter-spacing:1px;transition:all .15s;}
+.pb-print{background:var(--accent);color:#fff;}
+.pb-print:hover{background:#d4820a;}
+.pb-del{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.pb-del:hover{border-color:var(--red);color:var(--red);}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200;}
+.overlay.show{display:flex;}
+.modal{background:var(--surface);border-radius:8px;padding:24px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:14px;}
+.modal-title{font-family:var(--sans);font-weight:900;font-size:20px;}
+.modal-fields{display:flex;flex-direction:column;gap:10px;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+.btn-ok{background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:4px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;}
+.btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px 16px;border-radius:4px;font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:#1a1d24;color:#fff;font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:.5px;padding:10px 22px;border-radius:20px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:300;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:#c8cdd8;border-radius:2px;}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">Plate <span>Identificator</span></div>
-  <div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);">CT221B — ÉTIQUETTES 50×30mm</div>
+  <div style="font-family:var(--mono);font-size:10px;color:var(--muted);">CT221B — ÉTIQUETTES THERMIQUES</div>
   <div class="printer-status">
     <div class="status-dot" id="statusDot"></div>
-    <span id="statusText">IMPRIMANTE NON CONNECTÉE</span>
+    <span id="statusText">NON CONNECTÉE</span>
   </div>
 </header>
 
-<div class="app">
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('label')">🏷 Étiquette</div>
+  <div class="tab" onclick="switchTab('stock')">📦 Stock plaques</div>
+</div>
 
-  <!-- PANEL GAUCHE -->
+<!-- ══════ VUE ÉTIQUETTE ══════ -->
+<div class="view active" id="view-label">
+<div class="label-view">
   <div class="panel">
 
-    <!-- MATIÈRE -->
+    <div>
+      <div class="section-title">Format étiquette</div>
+      <div class="format-selector">
+        <div class="format-opt active" id="fmt-30" onclick="setFormat(30)">
+          <div class="format-opt-label">50 × 30</div>
+          <div class="format-opt-sub">mm — horizontal</div>
+        </div>
+        <div class="format-opt" id="fmt-80" onclick="setFormat(80)">
+          <div class="format-opt-label">50 × 80</div>
+          <div class="format-opt-sub">mm — vertical</div>
+        </div>
+      </div>
+    </div>
+
     <div>
       <div class="section-title">Matière</div>
-      <div class="field-group">
+      <div style="display:flex;flex-direction:column;gap:10px;">
         <div class="field">
           <label>NOM DE LA MATIÈRE</label>
-          <input type="text" id="matiere" placeholder="ex: ALUMINIUM, PVC, INOX..." oninput="updatePreview()">
+          <input type="text" id="matiere" placeholder="ex: DIBOND, PVC..." oninput="updatePreview()">
         </div>
         <div>
-          <label style="display:block;margin-bottom:8px;">PRESET RAPIDE</label>
-          <div class="presets" id="presets">
+          <label style="display:block;margin-bottom:6px;">PRESET RAPIDE</label>
+          <div class="presets">
             <button class="preset-btn" onclick="setPreset(this,'DIBOND')">Dibond</button>
             <button class="preset-btn" onclick="setPreset(this,'PVC')">PVC</button>
             <button class="preset-btn" onclick="setPreset(this,'MDF')">MDF</button>
             <button class="preset-btn" onclick="setPreset(this,'PLEXIGLASS')">Plexiglass</button>
             <button class="preset-btn" onclick="setPreset(this,'BEELITE')">Beelite</button>
-            <button class="preset-btn" onclick="setPreset(this,'POLYPRO ALVÉOLAIRE')">Polypro Alvéolaire</button>
+            <button class="preset-btn" onclick="setPreset(this,'POLYPRO ALVÉOLAIRE')">Polypro Alv.</button>
             <button class="preset-btn" onclick="setPreset(this,'CARTON E-GOLF')">Carton E-Golf</button>
             <button class="preset-btn" onclick="setPreset(this,'PALBOARD')">Palboard</button>
             <button class="preset-btn" onclick="setPreset(this,'PAPIER')">Papier</button>
           </div>
         </div>
-        <div class="field">
-          <label>ÉPAISSEUR</label>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="number" id="epaisseur" placeholder="0" min="0" step="0.5" oninput="updatePreview()" style="flex:1;">
-            <select id="unite" onchange="updatePreview()" style="width:80px;">
-              <option value="mm">mm</option>
-              <option value="cm">cm</option>
-              <option value="µm">µm</option>
-              <option value="in">in</option>
-            </select>
+        <div style="display:flex;gap:8px;">
+          <div class="field" style="flex:1;"><label>ÉPAISSEUR</label><input type="number" id="epaisseur" placeholder="0" min="0" step="0.5" oninput="updatePreview()"></div>
+          <div class="field" style="width:80px;"><label>UNITÉ</label>
+            <select id="unite" onchange="updatePreview()"><option value="mm">mm</option><option value="cm">cm</option><option value="µm">µm</option><option value="in">in</option></select>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- DIMENSIONS PLAQUE -->
     <div>
       <div class="section-title">Dimensions de la plaque</div>
-      <div class="field-group">
-        <div class="row-2">
-          <div class="field">
-            <label>HAUTEUR (mm)</label>
-            <input type="number" id="dimH" placeholder="0" min="0" oninput="updatePreview()">
-          </div>
-          <div class="field">
-            <label>LONGUEUR (mm)</label>
-            <input type="number" id="dimLon" placeholder="0" min="0" oninput="updatePreview()">
-          </div>
-        </div>
-        <div class="field">
-          <label>UNITÉ DIMS</label>
-          <select id="uniteD" onchange="updatePreview()">
-            <option value="mm">mm</option>
-            <option value="cm">cm</option>
-            <option value="m">m</option>
-            <option value="in">in</option>
-          </select>
-        </div>
+      <div class="row2">
+        <div class="field"><label>HAUTEUR</label><input type="number" id="dimH" placeholder="0" min="0" oninput="updatePreview()"></div>
+        <div class="field"><label>LONGUEUR</label><input type="number" id="dimLon" placeholder="0" min="0" oninput="updatePreview()"></div>
+      </div>
+      <div class="field" style="margin-top:8px;width:90px;"><label>UNITÉ</label>
+        <select id="uniteD" onchange="updatePreview()"><option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option></select>
       </div>
     </div>
 
-    <!-- JOB (OPTIONNEL) -->
     <div>
       <div class="section-title">Job</div>
       <div class="toggle-row" onclick="toggleJob()">
         <div class="toggle" id="jobToggle"></div>
-        <span class="toggle-label">Inclure les informations de job</span>
+        <span class="toggle-label">Inclure les infos de job</span>
       </div>
-      <div class="job-fields" id="jobFields" style="margin-top:14px;">
-        <div class="field">
-          <label>NOM DU JOB</label>
-          <input type="text" id="jobName" placeholder="ex: FACADE OUEST" oninput="updatePreview()">
-        </div>
-        <div class="field">
-          <label>N° DE JOB</label>
-          <input type="text" id="jobNum" placeholder="ex: JOB-2024-001" oninput="updatePreview()">
-        </div>
+      <div class="job-fields" id="jobFields" style="margin-top:10px;">
+        <div class="field"><label>NOM DU JOB</label><input type="text" id="jobName" placeholder="ex: FACADE OUEST" oninput="updatePreview()"></div>
+        <div class="field"><label>N° DE JOB</label><input type="text" id="jobNum" placeholder="ex: JOB-2024-001" oninput="updatePreview()"></div>
       </div>
     </div>
 
-    <!-- IMPRESSION -->
     <div class="actions">
       <div class="copies-row">
         <label>COPIES :</label>
@@ -740,461 +262,544 @@
           <div class="qty-val" id="copiesVal">1</div>
           <button class="qty-btn" onclick="changeCopies(1)">+</button>
         </div>
+        <button class="btn-sm" style="margin-left:auto;" onclick="addToStockFromLabel()">+ Ajouter au stock</button>
       </div>
-      <button class="btn btn-connect" onclick="connectPrinter()">
-        ⚡ CONNECTER IMPRIMANTE BLUETOOTH
-      </button>
-      <button class="btn btn-secondary" onclick="previewPrint()">
-        🖨 APERÇU IMPRESSION
-      </button>
-      <button class="btn btn-primary" onclick="printLabel()">
-        ▶ IMPRIMER L'ÉTIQUETTE
-      </button>
+      <button class="btn btn-connect" onclick="connectPrinter()">⚡ CONNECTER BLUETOOTH</button>
+      <button class="btn btn-secondary" onclick="previewPrint()">🖨 APERÇU IMPRESSION</button>
+      <button class="btn btn-primary" onclick="printLabel()">▶ IMPRIMER L'ÉTIQUETTE</button>
     </div>
 
   </div>
 
-  <!-- PANNEAU PREVIEW -->
   <div class="preview-pane">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+      <div class="preview-hint" id="previewHint">APERÇU — 50 × 30 mm</div>
 
-    <div class="preview-label-wrapper">
-      <div class="preview-hint">APERÇU ÉTIQUETTE — 50 × 30 mm</div>
-
-      <div class="label-preview" id="labelPreview">
-        <!-- Job info (optionnel) -->
-        <div class="lbl-top" id="prevJobRow" style="display:none">
-          <span class="lbl-job-name" id="prevJobName">—</span>
-          <span class="lbl-job-num" id="prevJobNum">—</span>
+      <!-- 50x30 -->
+      <div class="lbl30" id="lbl30">
+        <div class="lbl-top" id="p30-job" style="display:none">
+          <span class="lbl-job-name" id="p30-jn"></span>
+          <span class="lbl-job-num" id="p30-jnum"></span>
         </div>
-        <div class="lbl-divider" id="prevDivider" style="display:none"></div>
-
-        <!-- Corps principal -->
+        <div class="lbl-divider" id="p30-div" style="display:none"></div>
         <div class="lbl-main">
-          <div class="lbl-matiere" id="prevMatiere">MATIÈRE</div>
-          <div class="lbl-epaisseur" id="prevEpaisseur">— mm</div>
-          <div class="lbl-dimensions">
-            <span class="lbl-dim-badge" id="prevDims">H × L</span>
-          </div>
+          <div class="lbl-mat" id="p30-mat" style="font-size:34px;">MATIÈRE</div>
+          <div class="lbl-ep" id="p30-ep" style="font-size:17px;">— mm</div>
+          <div class="lbl-dim"><span class="lbl-dim-badge" id="p30-dim" style="font-size:16px;">H × L</span></div>
         </div>
-
-        <!-- Bas de l'étiquette -->
         <div class="lbl-bottom">
-          <div class="lbl-logo">
-            <img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <!-- Fallback si l'image ne charge pas -->
-            <div style="display:none;align-items:center;gap:4px;">
-              <div style="width:18px;height:18px;background:#111;border-radius:2px;display:flex;align-items:center;justify-content:center;">
-                <span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:9px;color:#fff;">LV</span>
-              </div>
-              <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;color:#222;letter-spacing:1.5px;text-transform:uppercase;">LuxVisual</span>
-            </div>
-          </div>
-          <div class="lbl-serial" id="prevSerial">50×30mm</div>
+          <div class="lbl-logo"><img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:var(--sans);font-weight:900;font-size:11px;\'>LuxVisual</span>'"></div>
+          <div class="lbl-serial">50×30mm</div>
         </div>
       </div>
 
-      <!-- Règles indicatives -->
-      <div class="size-indicator">
-        <div class="size-ruler">
-          <div class="ruler-line" style="width:133px;"></div>
-          <span>50 mm</span>
+      <!-- 50x80 -->
+      <div class="lbl80" id="lbl80" style="display:none">
+        <div class="lbl-top" id="p80-job" style="display:none">
+          <span class="lbl-job-name" id="p80-jn"></span>
+          <span class="lbl-job-num" id="p80-jnum"></span>
         </div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <div class="ruler-line" style="width:80px;"></div>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--text-muted);">30 mm</span>
+        <div class="lbl-divider" id="p80-div" style="display:none"></div>
+        <div class="lbl-main" style="gap:8px;">
+          <div class="lbl-mat" id="p80-mat" style="font-size:38px;">MATIÈRE</div>
+          <div class="lbl-ep" id="p80-ep" style="font-size:22px;margin-top:8px;">— mm</div>
+          <div class="lbl-dim" style="margin-top:10px;"><span class="lbl-dim-badge" id="p80-dim" style="font-size:20px;padding:4px 12px;">H × L</span></div>
+        </div>
+        <div class="lbl-bottom">
+          <div class="lbl-logo"><img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:var(--sans);font-weight:900;font-size:11px;\'>LuxVisual</span>'"></div>
+          <div class="lbl-serial">50×80mm</div>
         </div>
       </div>
     </div>
 
-    <!-- HISTORIQUE -->
     <div class="history-pane">
       <div class="history-title">Historique</div>
-      <div class="history-list" id="historyList">
-        <div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);padding:8px 0;">Aucune impression récente</div>
+      <div class="history-list" id="historyList"><div style="font-family:var(--mono);font-size:10px;color:var(--muted);">Aucune impression</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════ VUE STOCK ══════ -->
+<div class="view" id="view-stock">
+<div class="stock-view">
+
+  <div class="stock-toolbar">
+    <input type="text" id="stockSearch" placeholder="🔍 Rechercher..." oninput="renderStock()">
+    <button class="btn-add" onclick="openModal()">＋ Nouvelle plaque</button>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted);" id="stockStats"></div>
+  </div>
+
+  <div class="stock-body">
+    <div class="families-col">
+      <div class="families-title">Familles</div>
+      <div id="familiesList"></div>
+    </div>
+    <div class="plates-col">
+      <div class="plates-header">
+        <div>
+          <div class="plates-title" id="familyTitle">Toutes les plaques</div>
+          <div class="plates-sub" id="familySub"></div>
+        </div>
+      </div>
+      <div class="plates-grid" id="platesGrid"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-title">Ajouter une plaque</div>
+    <div class="modal-fields">
+      <div class="field">
+        <label>FAMILLE (matière)</label>
+        <select id="mFam" onchange="onFamChange()">
+          <option value="">-- Sélectionner --</option>
+          <option>Dibond</option><option>PVC</option><option>MDF</option>
+          <option>Plexiglass</option><option>Beelite</option>
+          <option>Polypro Alvéolaire</option><option>Carton E-Golf</option>
+          <option>Palboard</option><option>Papier</option>
+          <option value="__new__">+ Nouvelle famille...</option>
+        </select>
+      </div>
+      <div class="field" id="newFamRow" style="display:none">
+        <label>NOM DE LA FAMILLE</label>
+        <input type="text" id="mNewFam" placeholder="ex: Aluminium">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div class="field" style="flex:1;"><label>ÉPAISSEUR</label><input type="number" id="mEp" placeholder="0" min="0" step="0.5"></div>
+        <div class="field" style="width:80px;"><label>UNITÉ</label>
+          <select id="mUnite"><option value="mm">mm</option><option value="cm">cm</option><option value="µm">µm</option></select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>HAUTEUR</label><input type="number" id="mH" placeholder="0" min="0"></div>
+        <div class="field"><label>LONGUEUR</label><input type="number" id="mL" placeholder="0" min="0"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>QUANTITÉ EN STOCK</label><input type="number" id="mQty" value="1" min="0"></div>
+        <div class="field"><label>ALERTE SI ≤</label><input type="number" id="mSeuil" value="2" min="0"></div>
       </div>
     </div>
-
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-ok" onclick="savePlate()">Enregistrer</button>
+    </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- Zone print cachée -->
-<div class="print-area" id="printArea" style="display:none;">
-  <div class="label-print" id="labelPrintContent"></div>
-</div>
-
 <script>
-  let copies = 1;
-  let jobEnabled = false;
-  let history = [];
-  let printerConnected = false;
+// ── STATE ──
+let copies=1, jobEnabled=false, printerConnected=false, bleDevice=null, bleChar=null;
+let currentFormat=30, currentFamily='';
+let hist = JSON.parse(localStorage.getItem('pi_hist')||'[]');
+let stock = JSON.parse(localStorage.getItem('pi_stock')||'[]');
 
-  // ——— UPDATE PREVIEW ———
-  function updatePreview() {
-    const mat = document.getElementById('matiere').value.toUpperCase() || 'MATIÈRE';
-    const ep = document.getElementById('epaisseur').value;
-    const unite = document.getElementById('unite').value;
-    const l = document.getElementById('dimL') ? document.getElementById('dimL').value : '';
-    const h = document.getElementById('dimH').value;
-    const lon = document.getElementById('dimLon').value;
-    const ud = document.getElementById('uniteD').value;
-    const jName = document.getElementById('jobName').value.toUpperCase();
-    const jNum = document.getElementById('jobNum').value.toUpperCase();
+// ── TABS ──
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(t==='label'&&i===0)||(t==='stock'&&i===1)));
+  document.getElementById('view-label').classList.toggle('active',t==='label');
+  document.getElementById('view-stock').classList.toggle('active',t==='stock');
+  if(t==='stock') renderStock();
+}
 
-    // Matière & épaisseur
-    document.getElementById('prevMatiere').textContent = mat;
-    document.getElementById('prevEpaisseur').textContent = ep ? `${ep} ${unite}` : `— ${unite}`;
-
-    // Dimensions
-    let dimStr = '';
-    if (h) dimStr += `H : ${h}`;
-    if (lon) dimStr += (dimStr ? '  ×  ' : '') + `L : ${lon}`;
-    if (dimStr) dimStr += ` ${ud}`;
-    document.getElementById('prevDims').textContent = dimStr || 'L × H × e';
-
-    // Job
-    const showJob = jobEnabled && (jName || jNum);
-    document.getElementById('prevJobRow').style.display = showJob ? 'flex' : 'none';
-    document.getElementById('prevDivider').style.display = showJob ? 'block' : 'none';
-    document.getElementById('prevJobName').textContent = jName || '—';
-    document.getElementById('prevJobNum').textContent = jNum || '—';
-  }
-
-  // ——— PRESET ———
-  function setPreset(btn, val) {
-    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('matiere').value = val;
-    updatePreview();
-  }
-
-  // ——— TOGGLE JOB ———
-  function toggleJob() {
-    jobEnabled = !jobEnabled;
-    document.getElementById('jobToggle').classList.toggle('on', jobEnabled);
-    document.getElementById('jobFields').classList.toggle('visible', jobEnabled);
-    updatePreview();
-  }
-
-  // ——— COPIES ———
-  function changeCopies(d) {
-    copies = Math.max(1, Math.min(99, copies + d));
-    document.getElementById('copiesVal').textContent = copies;
-  }
-
-  // ——— BLE STATE ———
-  let bleDevice = null;
-  let bleChar = null;
-
-  // Tous les UUID connus pour imprimantes CLabel / TSC / Zebra BLE
-  const KNOWN_SERVICES = [
-    '000018f0-0000-1000-8000-00805f9b34fb', // CLabel CT221B standard
-    '00001101-0000-1000-8000-00805f9b34fb', // SPP classique
-    'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // TSC série récente
-    '49535343-fe7d-4ae5-8fa9-9fafd205e455', // Peripage / CLabel variante
-    '000018f0-0000-1000-8000-00805f9b34fb',
-  ];
-
-  const KNOWN_CHARS = [
-    '00002af1-0000-1000-8000-00805f9b34fb', // CLabel standard
-    'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f', // TSC récent
-    '49535343-8841-43f4-a8d4-ecbe34729bb3', // Peripage variante
-    '00002af0-0000-1000-8000-00805f9b34fb',
-  ];
-
-  function logStatus(msg) {
-    console.log('[BLE]', msg);
-    document.getElementById('statusText').textContent = msg;
-  }
-
-  // ——— BLUETOOTH CONNECT ———
-  async function connectPrinter() {
-    if (!navigator.bluetooth) {
-      showToast('❌ Web Bluetooth non dispo — utilisez Chrome Android');
-      return;
-    }
-    try {
-      logStatus('🔍 Sélection appareil...');
-      bleDevice = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: KNOWN_SERVICES
-      });
-
-      bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
-      logStatus('🔗 Connexion GATT...');
-
-      const server = await bleDevice.gatt.connect();
-      logStatus('📋 Lecture des services...');
-
-      // Lister tous les services disponibles
-      let allServices = [];
-      try {
-        allServices = await server.getPrimaryServices();
-        console.log('[BLE] Services trouvés:', allServices.map(s => s.uuid));
-        logStatus(`🔎 ${allServices.length} service(s) trouvé(s)...`);
-      } catch(e) {
-        console.warn('[BLE] getPrimaryServices failed, essai UUID par UUID', e);
-      }
-
-      // Essai 1 : parcourir les services trouvés
-      for (const svc of allServices) {
-        try {
-          const chars = await svc.getCharacteristics();
-          console.log('[BLE] Service', svc.uuid, '→ chars:', chars.map(c => c.uuid));
-          for (const c of chars) {
-            if (c.properties.write || c.properties.writeWithoutResponse) {
-              bleChar = c;
-              console.log('[BLE] ✅ Char écriture trouvée:', c.uuid);
-              break;
-            }
-          }
-          if (bleChar) break;
-        } catch(e) { console.warn('[BLE] Svc', svc.uuid, 'erreur:', e.message); }
-      }
-
-      // Essai 2 : forcer les UUID connus si rien trouvé
-      if (!bleChar) {
-        logStatus('🔎 Essai UUID connus...');
-        for (const svcUuid of KNOWN_SERVICES) {
-          try {
-            const svc = await server.getPrimaryService(svcUuid);
-            for (const charUuid of KNOWN_CHARS) {
-              try {
-                const c = await svc.getCharacteristic(charUuid);
-                if (c.properties.write || c.properties.writeWithoutResponse) {
-                  bleChar = c;
-                  console.log('[BLE] ✅ Match UUID connu:', svcUuid, charUuid);
-                  break;
-                }
-              } catch(e) {}
-            }
-            if (bleChar) break;
-          } catch(e) {}
-        }
-      }
-
-      if (!bleChar) {
-        showToast('❌ Caractéristique écriture non trouvée — voir console');
-        logStatus('❌ Char introuvable — imprimante incompatible ?');
-        return;
-      }
-
-      printerConnected = true;
-      document.getElementById('statusDot').classList.add('connected');
-      logStatus(`✓ ${bleDevice.name || 'Imprimante'} connectée`);
-      showToast('✅ Imprimante connectée !');
-
-    } catch(e) {
-      if (e.name === 'NotFoundError') { logStatus('IMPRIMANTE NON CONNECTÉE'); return; }
-      console.error('[BLE] Erreur:', e);
-      showToast('❌ ' + e.message);
-      logStatus('❌ ' + e.message);
-    }
-  }
-
-  function onDisconnected() {
-    printerConnected = false;
-    bleChar = null;
-    document.getElementById('statusDot').classList.remove('connected');
-    logStatus('IMPRIMANTE DÉCONNECTÉE');
-    showToast('⚠ Imprimante déconnectée');
-  }
-
-  // ——— COMMANDES TSC AVEC POLICES INTÉGRÉES CT221B ———
-  // Polices dispo : "0"=8x8, "1"=12x20, "2"=16x24, "3"=20x28, "4"=24x32, "5"=32x48
-  // TSPL2 : TEXT x,y,"police",rotation,xmul,ymul,"texte"
-  // Coordonnées en dots (203dpi : 1mm = 8 dots) — 50mm=400dots, 30mm=240dots
-  // Zone safe : x 0→390, y 0→228
-
-  function buildTSC(mat, ep, unite, h, lon, ud, jName, jNum, qty) {
-    const MX = 8;
-    let y = 4;
-    let cmds = '';
-
-    // ── EN-TÊTE ──
-    cmds += `SIZE 50 mm,30 mm\r\n`;
-    cmds += `GAP 3 mm,0 mm\r\n`;
-    cmds += `DIRECTION 0,0\r\n`;
-    cmds += `REFERENCE 0,0\r\n`;
-    cmds += `OFFSET 0 mm\r\n`;
-    cmds += `CLS\r\n`;
-
-    // ── JOB (optionnel) ──
-    if (jName || jNum) {
-      // Police "2" = 16x24dots → hauteur rendue ~24dots
-      if (jName) cmds += `TEXT ${MX},${y},"2",0,1,1,"${jName.toUpperCase().substring(0,18)}"\r\n`;
-      if (jNum)  cmds += `TEXT ${jName ? 210 : MX},${y},"2",0,1,1,"${jNum.toUpperCase().substring(0,10)}"\r\n`;
-      y += 26;
-      cmds += `BAR ${MX},${y},${390-MX},1\r\n`;
-      y += 4;
-    }
-
-    // ── MATIÈRE (police adaptée à la longueur) ──
-    const mlen = mat.length;
-    let mFont, mMul, mH;
-    if      (mlen <= 5)  { mFont="5"; mMul=2; mH=52; } // très court → énorme
-    else if (mlen <= 8)  { mFont="5"; mMul=1; mH=50; } // court → grande
-    else if (mlen <= 12) { mFont="4"; mMul=2; mH=38; } // moyen
-    else if (mlen <= 16) { mFont="4"; mMul=1; mH=34; } // long
-    else                 { mFont="3"; mMul=1; mH=30; } // très long
-
-    // Si job présent, réduire
-    if ((jName||jNum) && mMul > 1) { mMul=1; mH -= 10; }
-
-    cmds += `TEXT ${MX},${y},"${mFont}",0,${mMul},${mMul},"${mat.toUpperCase().substring(0,20)}"\r\n`;
-    y += mH;
-
-    // ── ÉPAISSEUR (police "3" = 20x28) ──
-    if (ep) {
-      cmds += `TEXT ${MX},${y},"3",0,1,1,"EP: ${ep} ${unite}"\r\n`;
-      y += 30;
-    }
-
-    // ── DIMENSIONS (police "3") ──
-    if (h || lon) {
-      let dim = '';
-      if (h)   dim += `H:${h}`;
-      if (lon) dim += (dim ? ' x ' : '') + `L:${lon}`;
-      if (dim) dim += ` ${ud}`;
-      cmds += `TEXT ${MX},${y},"3",0,1,1,"${dim}"\r\n`;
-      y += 30;
-    }
-
-    // ── PIED : ligne séparatrice + LuxVisual (police "1" = 12x20) ──
-    cmds += `BAR ${MX},216,${390-MX},1\r\n`;
-    cmds += `TEXT ${MX},218,"1",0,1,1,"LuxVisual"\r\n`;
-
-    // ── IMPRESSION ──
-    cmds += `PRINT ${qty},1\r\n`;
-
-    return cmds;
-  }
-
-  // ——— ENVOI BLE en chunks ———
-  async function bleWriteChunked(data) {
-    const CHUNK = 128;
-    for (let i = 0; i < data.length; i += CHUNK) {
-      await bleChar.writeValue(data.slice(i, i + CHUNK));
-      await new Promise(r => setTimeout(r, 20));
-    }
-  }
-
-  // ——— IMPRESSION BLE ———
-  async function printLabel() {
-    const mat = document.getElementById('matiere').value;
-    if (!mat) { showToast('⚠ Entrez le nom de la matière'); return; }
-
-    const ep    = document.getElementById('epaisseur').value;
-    const unite = document.getElementById('unite').value;
-    const h     = document.getElementById('dimH').value;
-    const lon   = document.getElementById('dimLon').value;
-    const ud    = document.getElementById('uniteD').value;
-    const jName = jobEnabled ? document.getElementById('jobName').value : '';
-    const jNum  = jobEnabled ? document.getElementById('jobNum').value  : '';
-
-    addToHistory(mat, ep, unite);
-
-    if (!printerConnected || !bleChar) {
-      showToast('⚠ Connectez d\'abord l\'imprimante');
-      return;
-    }
-
-    try {
-      showToast(`🖨 Envoi × ${copies}...`);
-      const tsc  = buildTSC(mat, ep, unite, h, lon, ud, jName, jNum, copies);
-      const data = new TextEncoder().encode(tsc);
-      await bleWriteChunked(data);
-      showToast(`✅ ${copies} étiquette(s) !`);
-    } catch(e) {
-      console.error(e);
-      showToast('❌ ' + e.message);
-    }
-  }
-
-  // ——— APERÇU VISUEL (fallback si pas connecté) ———
-  function previewPrint() {
-    const mat   = document.getElementById('matiere').value || 'MATIÈRE';
-    const ep    = document.getElementById('epaisseur').value;
-    const unite = document.getElementById('unite').value;
-    const h     = document.getElementById('dimH').value;
-    const lon   = document.getElementById('dimLon').value;
-    const ud    = document.getElementById('uniteD').value;
-    const jName = jobEnabled ? document.getElementById('jobName').value : '';
-    const jNum  = jobEnabled ? document.getElementById('jobNum').value  : '';
-
-    const win = window.open('', '_blank', 'width=340,height=260');
-    win.document.write(`
-      <html><head><title>Aperçu 50×30mm</title>
-      <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
-      <style>
-        body{margin:0;padding:6mm;background:#ccc;display:flex;align-items:center;justify-content:center;min-height:100vh;}
-        .lbl{width:50mm;height:30mm;background:#fff;padding:2mm 2.5mm;box-sizing:border-box;
-          font-family:'Barlow Condensed',sans-serif;border:1px solid #999;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,.2);}
-        .job{font-size:8pt;font-weight:700;color:#222;display:flex;justify-content:space-between;border-bottom:.3mm solid #ccc;padding-bottom:.8mm;margin-bottom:.8mm;}
-        .mat{font-size:18pt;font-weight:900;color:#111;line-height:1;text-transform:uppercase;}
-        .ep{font-family:'Share Tech Mono',monospace;font-size:10pt;color:#333;margin-top:.5mm;}
-        .dims{font-family:'Barlow Condensed',sans-serif;font-size:10pt;font-weight:700;color:#111;background:#f0f0f0;padding:0 1.5mm;margin-top:.8mm;display:inline-block;}
-        .foot{margin-top:auto;border-top:.3mm solid #eee;padding-top:.8mm;display:flex;align-items:center;}
-        .foot img{height:10pt;width:auto;filter:grayscale(100%) brightness(0);}
-      </style></head><body>
-      <div class="lbl">
-        ${(jName||jNum)?`<div class="job"><span>${jName.toUpperCase()}</span><span>${jNum.toUpperCase()}</span></div>`:''}
-        <div class="mat">${mat.toUpperCase()}</div>
-        ${ep ? `<div class="ep">ép. ${ep} ${unite}</div>` : ''}
-        ${(h||lon) ? `<div class="dims">${h?'H:'+h:''} ${lon?'× L:'+lon:''} ${ud}</div>` : ''}
-        <div class="foot">
-          <img src="https://www.luxvisual.lu/images/luxvisual_logo.png" alt="LuxVisual">
-        </div>
-      </div>
-      </body></html>
-    `);
-    win.document.close();
-    addToHistory(mat, ep, unite);
-  }
-
-  // ——— HISTORIQUE ———
-  function addToHistory(mat, ep, unite) {
-    const ts = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
-    history.unshift({ mat, ep, unite, ts });
-    if (history.length > 8) history.pop();
-    renderHistory();
-  }
-
-  function renderHistory() {
-    const el = document.getElementById('historyList');
-    if (!history.length) {
-      el.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);padding:8px 0;">Aucune impression récente</div>';
-      return;
-    }
-    el.innerHTML = history.map((h, i) => `
-      <div class="history-item" onclick="reloadHistory(${i})">
-        <div class="history-item-text">${h.mat} — ${h.ep||'?'} ${h.unite} • ${h.ts}</div>
-        <span class="history-item-reprint">↩ recharger</span>
-      </div>
-    `).join('');
-  }
-
-  function reloadHistory(i) {
-    const h = history[i];
-    document.getElementById('matiere').value = h.mat;
-    document.getElementById('epaisseur').value = h.ep;
-    document.getElementById('unite').value = h.unite;
-    updatePreview();
-    showToast('↩ Données rechargées');
-  }
-
-  // ——— TOAST ———
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
-
-  // Init
+// ── FORMAT ──
+function setFormat(h) {
+  currentFormat=h;
+  document.getElementById('fmt-30').classList.toggle('active',h===30);
+  document.getElementById('fmt-80').classList.toggle('active',h===80);
+  document.getElementById('lbl30').style.display=h===30?'':'none';
+  document.getElementById('lbl80').style.display=h===80?'':'none';
+  document.getElementById('previewHint').textContent=`APERÇU — 50 × ${h} mm`;
   updatePreview();
+}
+
+// ── PREVIEW ──
+function updatePreview() {
+  const mat=document.getElementById('matiere').value.toUpperCase()||'MATIÈRE';
+  const ep=document.getElementById('epaisseur').value;
+  const unite=document.getElementById('unite').value;
+  const h=document.getElementById('dimH').value;
+  const lon=document.getElementById('dimLon').value;
+  const ud=document.getElementById('uniteD').value;
+  const jn=document.getElementById('jobName').value.toUpperCase();
+  const jnum=document.getElementById('jobNum').value.toUpperCase();
+  const p=currentFormat===30?'p30':'p80';
+  const showJob=jobEnabled&&(jn||jnum);
+
+  const base=currentFormat===30?34:38;
+  const fs=mat.length>16?base-10:mat.length>12?base-6:mat.length>8?base-2:base;
+  document.getElementById(p+'-mat').style.fontSize=fs+'px';
+  document.getElementById(p+'-mat').textContent=mat;
+  document.getElementById(p+'-ep').textContent=ep?`${ep} ${unite}`:`— ${unite}`;
+  document.getElementById(p+'-ep').style.fontSize=currentFormat===30?'17px':'22px';
+  let dim='';
+  if(h) dim+=`H:${h}`;
+  if(lon) dim+=(dim?' × ':'')+`L:${lon}`;
+  if(dim) dim+=` ${ud}`;
+  document.getElementById(p+'-dim').textContent=dim||'H × L';
+  document.getElementById(p+'-dim').style.fontSize=currentFormat===30?'16px':'20px';
+  document.getElementById(p+'-job').style.display=showJob?'flex':'none';
+  document.getElementById(p+'-div').style.display=showJob?'block':'none';
+  document.getElementById(p+'-jn').textContent=jn;
+  document.getElementById(p+'-jnum').textContent=jnum;
+}
+
+function setPreset(btn,val) {
+  document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('matiere').value=val;
+  updatePreview();
+}
+
+function toggleJob() {
+  jobEnabled=!jobEnabled;
+  document.getElementById('jobToggle').classList.toggle('on',jobEnabled);
+  document.getElementById('jobFields').classList.toggle('visible',jobEnabled);
+  updatePreview();
+}
+
+function changeCopies(d) {
+  copies=Math.max(1,Math.min(99,copies+d));
+  document.getElementById('copiesVal').textContent=copies;
+}
+
+// ── BLE ──
+const SVCS=['000018f0-0000-1000-8000-00805f9b34fb','e7810a71-73ae-499d-8c15-faa9aef0c3f2','49535343-fe7d-4ae5-8fa9-9fafd205e455'];
+const CHARS=['00002af1-0000-1000-8000-00805f9b34fb','bef8d6c9-9c21-4c9e-b632-bd58c1009f9f','49535343-8841-43f4-a8d4-ecbe34729bb3','00002af0-0000-1000-8000-00805f9b34fb'];
+
+function setStatus(m){document.getElementById('statusText').textContent=m;}
+
+async function connectPrinter() {
+  if(!navigator.bluetooth){showToast('❌ Chrome Android requis');return;}
+  try {
+    setStatus('🔍 Recherche...');
+    bleDevice=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SVCS});
+    bleDevice.addEventListener('gattserverdisconnected',()=>{
+      printerConnected=false;bleChar=null;
+      document.getElementById('statusDot').classList.remove('connected');
+      setStatus('DÉCONNECTÉE');showToast('⚠ Déconnectée');
+    });
+    const server=await bleDevice.gatt.connect();
+    setStatus('📋 Scan...');
+    let svcs=[];try{svcs=await server.getPrimaryServices();}catch(e){}
+    for(const s of svcs){try{const cs=await s.getCharacteristics();for(const c of cs){if(c.properties.write||c.properties.writeWithoutResponse){bleChar=c;break;}}if(bleChar)break;}catch(e){}}
+    if(!bleChar){
+      for(const su of SVCS){try{const s=await server.getPrimaryService(su);for(const cu of CHARS){try{const c=await s.getCharacteristic(cu);if(c.properties.write||c.properties.writeWithoutResponse){bleChar=c;break;}}catch(e){}}if(bleChar)break;}catch(e){}}
+    }
+    if(!bleChar){showToast('❌ Service non trouvé');setStatus('❌ Incompatible');return;}
+    printerConnected=true;
+    document.getElementById('statusDot').classList.add('connected');
+    setStatus(`✓ ${bleDevice.name||'CT221B'}`);
+    showToast('✅ Connectée !');
+  } catch(e){if(e.name==='NotFoundError'){setStatus('NON CONNECTÉE');return;}showToast('❌ '+e.message);setStatus('❌ Erreur');}
+}
+
+async function bleWrite(data) {
+  const CHUNK=128;
+  for(let i=0;i<data.length;i+=CHUNK){
+    await bleChar.writeValue(data.slice(i,i+CHUNK));
+    await new Promise(r=>setTimeout(r,20));
+  }
+}
+
+// ── TSC (polices intégrées) ──
+// Polices : "0"=8x8 "1"=12x20 "2"=16x24 "3"=20x28 "4"=24x32 "5"=32x48
+function buildTSC(mat,ep,unite,h,lon,ud,jn,jnum,qty,fmt) {
+  const dotH=fmt*8; // dots hauteur (203dpi)
+  const MX=8;
+  let y=4, c='';
+  c+=`SIZE 50 mm,${fmt} mm\r\n`;
+  c+=`GAP 3 mm,0 mm\r\n`;
+  c+=`DIRECTION 0,0\r\n`;
+  c+=`REFERENCE 0,0\r\n`;
+  c+=`OFFSET 0 mm\r\n`;
+  c+=`CLS\r\n`;
+
+  // JOB
+  if(jn||jnum){
+    if(jn) c+=`TEXT ${MX},${y},"2",0,1,1,"${jn.substring(0,18).toUpperCase()}"\r\n`;
+    if(jnum) c+=`TEXT ${jn?210:MX},${y},"2",0,1,1,"${jnum.substring(0,10).toUpperCase()}"\r\n`;
+    y+=26; c+=`BAR ${MX},${y},384,1\r\n`; y+=5;
+  }
+
+  // MATIÈRE — taille selon longueur et format
+  const ml=mat.length;
+  let mF,mM,mH;
+  const big=fmt===80;
+  if(ml<=4) {mF='5';mM=big?3:2;mH=big?80:54;}
+  else if(ml<=6) {mF='5';mM=big?2:1;mH=big?66:50;}
+  else if(ml<=9) {mF='4';mM=big?2:2;mH=big?54:42;}
+  else if(ml<=13){mF='4';mM=big?2:1;mH=big?48:36;}
+  else if(ml<=17){mF='3';mM=big?2:1;mH=big?42:30;}
+  else {mF='2';mM=1;mH=big?32:26;}
+  if((jn||jnum)&&mM>1){mM=1;mH-=12;}
+  c+=`TEXT ${MX},${y},"${mF}",0,${mM},${mM},"${mat.substring(0,20).toUpperCase()}"\r\n`;
+  y+=mH;
+
+  // ÉPAISSEUR
+  if(ep){
+    const f=big?'4':'3'; const dh=big?38:30;
+    c+=`TEXT ${MX},${y},"${f}",0,1,1,"EP: ${ep} ${unite}"\r\n`;
+    y+=dh;
+  }
+
+  // DIMENSIONS
+  if(h||lon){
+    let dim='';
+    if(h) dim+=`H:${h}`;
+    if(lon) dim+=(dim?' x ':'')+`L:${lon}`;
+    if(dim) dim+=` ${ud}`;
+    const f=big?'4':'3'; const dh=big?38:30;
+    c+=`TEXT ${MX},${y},"${f}",0,1,1,"${dim}"\r\n`;
+    y+=dh;
+  }
+
+  // PIED
+  const fy=dotH-22;
+  c+=`BAR ${MX},${fy},384,1\r\n`;
+  c+=`TEXT ${MX},${fy+3},"1",0,1,1,"LuxVisual"\r\n`;
+  c+=`PRINT ${qty},1\r\n`;
+  return c;
+}
+
+async function printLabel() {
+  const mat=document.getElementById('matiere').value;
+  if(!mat){showToast('⚠ Entrez le nom de la matière');return;}
+  const ep=document.getElementById('epaisseur').value;
+  const unite=document.getElementById('unite').value;
+  const h=document.getElementById('dimH').value;
+  const lon=document.getElementById('dimLon').value;
+  const ud=document.getElementById('uniteD').value;
+  const jn=jobEnabled?document.getElementById('jobName').value:'';
+  const jnum=jobEnabled?document.getElementById('jobNum').value:'';
+  addToHist(mat,ep,unite);
+  if(!printerConnected||!bleChar){showToast('⚠ Connectez l\'imprimante');return;}
+  try {
+    showToast(`🖨 Envoi × ${copies}...`);
+    const tsc=buildTSC(mat,ep,unite,h,lon,ud,jn,jnum,copies,currentFormat);
+    await bleWrite(new TextEncoder().encode(tsc));
+    showToast(`✅ ${copies} étiquette(s) !`);
+  } catch(e){showToast('❌ '+e.message);}
+}
+
+function previewPrint() {
+  const mat=document.getElementById('matiere').value||'MATIÈRE';
+  const ep=document.getElementById('epaisseur').value, unite=document.getElementById('unite').value;
+  const h=document.getElementById('dimH').value, lon=document.getElementById('dimLon').value, ud=document.getElementById('uniteD').value;
+  const jn=jobEnabled?document.getElementById('jobName').value:'';
+  const jnum=jobEnabled?document.getElementById('jobNum').value:'';
+  const fmt=currentFormat;
+  const win=window.open('','_blank',`width=${50*5+60},height=${fmt*5+60}`);
+  win.document.write(`<html><head><title>Aperçu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>body{margin:0;padding:6mm;background:#bbb;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  .l{width:50mm;height:${fmt}mm;background:#fff;padding:2.5mm 3mm;box-sizing:border-box;border:1px solid #999;display:flex;flex-direction:column;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+  .job{font-family:'Barlow Condensed',sans-serif;font-size:9pt;font-weight:700;display:flex;justify-content:space-between;border-bottom:.3mm solid #ccc;padding-bottom:1mm;margin-bottom:1mm;}
+  .mat{font-family:'Barlow Condensed',sans-serif;font-size:${fmt===80?'22':'16'}pt;font-weight:900;text-transform:uppercase;line-height:1.05;}
+  .ep{font-family:'Share Tech Mono',monospace;font-size:${fmt===80?'13':'10'}pt;color:#222;margin-top:1.5mm;}
+  .dim{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:${fmt===80?'13':'10'}pt;background:#f0f0f0;padding:.5mm 2mm;margin-top:1.5mm;display:inline-block;}
+  .foot{margin-top:auto;font-family:'Barlow Condensed',sans-serif;font-size:7pt;font-weight:700;border-top:.3mm solid #eee;padding-top:1mm;}
+  </style></head><body><div class="l">
+  ${(jn||jnum)?`<div class="job"><span>${jn.toUpperCase()}</span><span>${jnum.toUpperCase()}</span></div>`:''}
+  <div class="mat">${mat.toUpperCase()}</div>
+  ${ep?`<div class="ep">EP: ${ep} ${unite}</div>`:''}
+  ${(h||lon)?`<div class="dim">${h?'H:'+h:''} ${lon?'× L:'+lon:''} ${ud}</div>`:''}
+  <div class="foot">LuxVisual</div></div></body></html>`);
+  win.document.close();
+  addToHist(mat,ep,unite);
+}
+
+// ── HISTORIQUE ──
+function addToHist(mat,ep,unite) {
+  const ts=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  hist.unshift({mat,ep,unite,ts});
+  if(hist.length>8) hist.pop();
+  localStorage.setItem('pi_hist',JSON.stringify(hist));
+  renderHist();
+}
+function renderHist() {
+  const el=document.getElementById('historyList');
+  if(!hist.length){el.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--muted);">Aucune impression</div>';return;}
+  el.innerHTML=hist.map((h,i)=>`<div class="history-item" onclick="reloadHist(${i})"><div class="history-item-text">${h.mat} ${h.ep?'— '+h.ep+h.unite:''} • ${h.ts}</div><span class="history-rp">↩</span></div>`).join('');
+}
+function reloadHist(i) {
+  const h=hist[i];
+  document.getElementById('matiere').value=h.mat;
+  document.getElementById('epaisseur').value=h.ep;
+  document.getElementById('unite').value=h.unite;
+  updatePreview();showToast('↩ Rechargé');
+}
+
+// ── STOCK ──
+function saveStock(){localStorage.setItem('pi_stock',JSON.stringify(stock));}
+
+function getFamilies() {
+  const m={};
+  stock.forEach(p=>{if(!m[p.famille])m[p.famille]=0;m[p.famille]++;});
+  return m;
+}
+
+function renderStock() {
+  const search=document.getElementById('stockSearch').value.toLowerCase();
+  const fams=getFamilies();
+  const totalQty=stock.reduce((s,p)=>s+p.qty,0);
+  document.getElementById('stockStats').textContent=`${stock.length} référence(s) · ${totalQty} plaques`;
+
+  // Familles
+  const fl=document.getElementById('familiesList');
+  fl.innerHTML=`<div class="family-item ${!currentFamily?'active':''}" onclick="selectFamily('')">
+    <span class="family-name">Toutes</span><span class="family-count">${stock.length}</span></div>`+
+    Object.entries(fams).sort(([a],[b])=>a.localeCompare(b)).map(([n,cnt])=>`
+    <div class="family-item ${currentFamily===n?'active':''}" onclick="selectFamily('${n}')">
+      <span class="family-name">${n}</span><span class="family-count">${cnt}</span></div>`).join('');
+
+  // Plaques filtrées
+  let plates=stock;
+  if(currentFamily) plates=plates.filter(p=>p.famille===currentFamily);
+  if(search) plates=plates.filter(p=>
+    p.famille.toLowerCase().includes(search)||
+    String(p.ep).includes(search)||
+    String(p.h||'').includes(search)||
+    String(p.l||'').includes(search)
+  );
+
+  document.getElementById('familyTitle').textContent=currentFamily||'Toutes les plaques';
+  document.getElementById('familySub').textContent=`${plates.length} référence(s)`;
+
+  const grid=document.getElementById('platesGrid');
+  if(!plates.length){
+    grid.innerHTML=`<div style="padding:20px 0;font-family:var(--mono);font-size:12px;color:var(--muted);">Aucune plaque — ajoutez-en une !</div>`;
+    return;
+  }
+
+  grid.innerHTML=plates.map(p=>{
+    const empty=p.qty===0;
+    const low=p.qty>0&&p.qty<=p.seuil;
+    const qc=empty?'empty':low?'low':'ok';
+    const stripe=empty?'var(--red)':low?'#f59e0b':'var(--green)';
+    let dim='';
+    if(p.h) dim+=`H:${p.h}`;
+    if(p.l) dim+=(dim?' × ':'')+`L:${p.l}`;
+    if(dim) dim+=` mm`;
+    return `<div class="plate-card">
+      <div class="plate-stripe" style="background:${stripe}"></div>
+      <div class="plate-info">
+        <div class="plate-mat">${p.famille}</div>
+        <div class="plate-detail">ép. ${p.ep} ${p.unite}${p.seuil?' · alerte ≤ '+p.seuil:''}</div>
+        ${dim?`<div class="plate-dims">${dim}</div>`:''}
+      </div>
+      <div class="stock-ctrl">
+        <button class="s-btn m" onclick="adj('${p.id}',-1)">−</button>
+        <div class="s-qty ${qc}">${p.qty}</div>
+        <button class="s-btn p" onclick="adj('${p.id}',+1)">+</button>
+      </div>
+      <div class="plate-btns">
+        <button class="pb pb-print" onclick="printFromStock('${p.id}')">🖨 Étiquette</button>
+        <button class="pb pb-del" onclick="delPlate('${p.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectFamily(f){currentFamily=f;renderStock();}
+
+function adj(id,d) {
+  const p=stock.find(x=>x.id===id); if(!p)return;
+  p.qty=Math.max(0,p.qty+d);
+  saveStock();renderStock();
+  if(p.qty===0) showToast(`🔴 ${p.famille} ${p.ep}${p.unite} — ÉPUISÉ`);
+  else if(p.qty<=p.seuil) showToast(`🟡 Stock bas : ${p.qty} plaque(s) restante(s)`);
+}
+
+function delPlate(id) {
+  if(!confirm('Supprimer cette plaque du stock ?')) return;
+  stock=stock.filter(x=>x.id!==id);
+  saveStock();renderStock();
+}
+
+function printFromStock(id) {
+  const p=stock.find(x=>x.id===id); if(!p)return;
+  document.getElementById('matiere').value=p.famille;
+  document.getElementById('epaisseur').value=p.ep;
+  document.getElementById('unite').value=p.unite;
+  document.getElementById('dimH').value=p.h||'';
+  document.getElementById('dimLon').value=p.l||'';
+  document.getElementById('uniteD').value='mm';
+  document.querySelectorAll('.preset-btn').forEach(b=>{
+    b.classList.toggle('active',b.textContent.toUpperCase()===p.famille.toUpperCase());
+  });
+  updatePreview();
+  switchTab('label');
+  showToast('✓ Données chargées');
+}
+
+// Raccourci depuis onglet étiquette
+function addToStockFromLabel() {
+  const mat=document.getElementById('matiere').value;
+  if(!mat){showToast('⚠ Entrez d\'abord la matière');return;}
+  openModal();
+  // Pré-remplir
+  const opts=[...document.getElementById('mFam').options];
+  const found=opts.find(o=>o.value.toUpperCase()===mat.toUpperCase());
+  if(found) document.getElementById('mFam').value=found.value;
+  else { document.getElementById('mFam').value='__new__'; document.getElementById('newFamRow').style.display=''; document.getElementById('mNewFam').value=mat; }
+  document.getElementById('mEp').value=document.getElementById('epaisseur').value;
+  document.getElementById('mUnite').value=document.getElementById('unite').value;
+  document.getElementById('mH').value=document.getElementById('dimH').value;
+  document.getElementById('mL').value=document.getElementById('dimLon').value;
+}
+
+// MODAL
+function openModal() {
+  document.getElementById('mFam').value='';
+  document.getElementById('mNewFam').value='';
+  document.getElementById('newFamRow').style.display='none';
+  document.getElementById('mEp').value='';
+  document.getElementById('mH').value='';
+  document.getElementById('mL').value='';
+  document.getElementById('mQty').value='1';
+  document.getElementById('mSeuil').value='2';
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+function onFamChange(){document.getElementById('newFamRow').style.display=document.getElementById('mFam').value==='__new__'?'':'none';}
+
+function savePlate() {
+  let fam=document.getElementById('mFam').value;
+  if(fam==='__new__') fam=document.getElementById('mNewFam').value.trim();
+  if(!fam){showToast('⚠ Choisissez une famille');return;}
+  const ep=document.getElementById('mEp').value;
+  if(!ep){showToast('⚠ Entrez l\'épaisseur');return;}
+  const plate={
+    id:Date.now().toString(),
+    famille:fam,
+    ep:parseFloat(ep),
+    unite:document.getElementById('mUnite').value,
+    h:document.getElementById('mH').value||'',
+    l:document.getElementById('mL').value||'',
+    qty:parseInt(document.getElementById('mQty').value)||0,
+    seuil:parseInt(document.getElementById('mSeuil').value)||2,
+  };
+  stock.push(plate);
+  saveStock();closeModal();renderStock();
+  showToast(`✅ ${fam} ${ep}${plate.unite} ajouté`);
+}
+
+// ── TOAST ──
+function showToast(m) {
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── INIT ──
+updatePreview();renderHist();renderStock();
 </script>
 </body>
 </html>
