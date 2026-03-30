@@ -3,7 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plate Identificator — CT221B</title>
+<title>Plate Identificator</title>
+
+<!-- PWA — icône écran d'accueil -->
+<meta name="application-name" content="Plate ID">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Plate ID">
+<meta name="theme-color" content="#111111">
+<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Plate+Identificator%22%2C%22short_name%22%3A%22Plate+ID%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23111111%22%2C%22theme_color%22%3A%22%23111111%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA%2FwD%2FAP%2BgvaeTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAACMElEQVR4nO3BMQEAAADCoPVP7WsIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAMBuAABHQAAAABJRU5ErkJggg%3D%3D%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+
+<!-- Icône Apple (iOS) — SVG inline encodé -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23111'/%3E%3Crect x='0' y='0' width='192' height='72' rx='32' fill='%23111'/%3E%3Crect x='0' y='40' width='192' height='32' fill='%23111'/%3E%3Ctext x='96' y='52' font-family='Arial Black,Arial' font-weight='900' font-size='32' fill='white' text-anchor='middle'%3ELux%3C/text%3E%3Ctext x='96' y='52' font-family='Arial Black,Arial' font-weight='900' font-size='32' fill='white' text-anchor='middle' dx='38'%3EVisual%3C/text%3E%3Ctext x='96' y='78' font-family='Arial' font-size='11' fill='rgba(255,255,255,0.6)' text-anchor='middle'%3EInnovative Printing%3C/text%3E%3Crect x='16' y='100' width='160' height='2' fill='%23333'/%3E%3Ctext x='16' y='126' font-family='Courier New,monospace' font-weight='700' font-size='13' fill='%23555'%3EMatière:%3C/text%3E%3Ctext x='16' y='152' font-family='Courier New,monospace' font-weight='700' font-size='13' fill='%23555'%3EEpaisseur:%3C/text%3E%3Ctext x='16' y='178' font-family='Courier New,monospace' font-weight='700' font-size='13' fill='%23555'%3EDimensions:%3C/text%3E%3C/svg%3E">
+
+<script>
+// Génère et injecte le vrai SVG comme favicon + manifest icon
+(function() {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+    <rect width="192" height="192" rx="28" fill="#111"/>
+    <rect x="0" y="0" width="192" height="80" rx="28" fill="#111"/>
+    <rect x="0" y="52" width="192" height="28" fill="#111"/>
+    <text x="14" y="44" font-family="Arial Black,Arial" font-weight="900" font-size="28" fill="white">Lux</text>
+    <text x="72" y="44" font-family="Arial Black,Arial" font-weight="900" font-size="28" fill="#e8920a">Visual</text>
+    <text x="14" y="64" font-family="Arial,sans-serif" font-size="10" fill="rgba(255,255,255,0.55)" letter-spacing="1">Innovative Printing</text>
+    <line x1="14" y1="86" x2="178" y2="86" stroke="#333" stroke-width="1.5"/>
+    <text x="14" y="108" font-family="Courier New,monospace" font-weight="700" font-size="12" fill="#999">Matière:</text>
+    <rect x="14" y="114" width="80" height="2" rx="1" fill="#444"/>
+    <text x="14" y="136" font-family="Courier New,monospace" font-weight="700" font-size="12" fill="#999">Epaisseur:</text>
+    <rect x="14" y="142" width="60" height="2" rx="1" fill="#444"/>
+    <text x="14" y="164" font-family="Courier New,monospace" font-weight="700" font-size="12" fill="#999">Dimensions:</text>
+    <rect x="14" y="170" width="90" height="2" rx="1" fill="#444"/>
+  </svg>`;
+  const url = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  // Favicon
+  const link = document.createElement('link');
+  link.rel = 'icon'; link.type = 'image/svg+xml'; link.href = url;
+  document.head.appendChild(link);
+  // Apple touch icon
+  const apple = document.createElement('link');
+  apple.rel = 'apple-touch-icon'; apple.href = url;
+  document.head.appendChild(apple);
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -80,75 +121,54 @@ input:focus,select:focus{border-color:var(--accent);}
 .preview-hint{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;}
 
 /* ══════════════════════════════════════════
-   DESIGN ÉTIQUETTE — LuxVisual
-   Header noir : logo LuxVisual + tagline
-   Corps blanc : labels gras + valeurs
-   50×30mm → 240×384px portrait  /  80×50mm → 544×340px paysage
+   DESIGN ÉTIQUETTE — Simplifié, très lisible de loin
+   Header noir : LuxVisual
+   Corps : 3 valeurs max en très grand
 ══════════════════════════════════════════ */
-
-/* 50×30mm — rendu portrait comme l'image (le 50 est la largeur, 30 la hauteur physique
-   mais on l'affiche en portrait car c'est plus lisible pour ce design) */
 .lbl30 {
   width:204px; height:320px;
   background:#fff; border:2px solid #111;
   overflow:hidden; box-shadow:0 8px 28px rgba(0,0,0,.25);
   display:flex; flex-direction:column; flex-shrink:0;
 }
-/* 80×50mm paysage */
 .lbl80 {
   width:544px; height:340px;
   background:#fff; border:2px solid #111;
   overflow:hidden; box-shadow:0 8px 28px rgba(0,0,0,.25);
   display:flex; flex-direction:column; flex-shrink:0;
 }
-
-/* Header noir — logo LuxVisual */
+/* Header noir */
 .lbl-hd {
   background:#111;
   display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  flex-shrink:0;
-  padding:8px 10px;
-  gap:2px;
+  align-items:flex-start; justify-content:center;
+  flex-shrink:0; padding:0 12px;
+  gap:1px;
 }
-.lbl-hd-logo {
-  height:auto; filter:brightness(0) invert(1);
-}
-.lbl-hd-tagline {
-  font-family:'Courier New',monospace;
-  font-size:8px; color:rgba(255,255,255,0.65);
-  letter-spacing:0.5px; text-align:center;
-}
+.lbl-hd-logo { height:auto; filter:brightness(0) invert(1); }
+.lbl-hd-tagline { font-family:'Courier New',monospace; font-size:8px; color:rgba(255,255,255,0.5); letter-spacing:.5px; }
+.lbl-hd-job { font-family:'Courier New',monospace; font-size:8px; color:rgba(255,255,255,0.7); display:flex; justify-content:space-between; width:100%; margin-bottom:2px; }
 
-/* Corps — champs label + valeur */
+/* Corps — valeurs uniquement, très grandes */
 .lbl-fields {
   flex:1; display:flex; flex-direction:column;
-  padding:8px 12px; gap:0;
-  background:#fff;
+  justify-content:center;
+  padding:10px 14px; gap:0;
 }
-.lbl-field {
-  display:flex; flex-direction:column;
-  border-bottom:1px solid #e8e8e8;
-  padding:5px 0;
-  flex-shrink:0;
-}
-.lbl-field:last-child { border-bottom:none; }
-.lbl-field-label {
-  font-family:'Courier New',monospace;
-  font-weight:700; color:#111;
-  line-height:1.2;
-}
-.lbl-field-value {
-  font-family:'Courier New',monospace;
-  color:#333; line-height:1.2;
+.lbl-val-main {
+  font-family:'Courier New',monospace; font-weight:700;
+  color:#000; line-height:1.05;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-/* Job dans header */
-.lbl-hd-job {
+.lbl-val-sub {
   font-family:'Courier New',monospace;
-  font-size:8px; color:rgba(255,255,255,0.8);
-  display:flex; justify-content:space-between; width:100%;
-  margin-bottom:2px;
+  color:#333; line-height:1.1;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.lbl-sep { height:1px; background:#e0e0e0; margin:6px 0; flex-shrink:0; }
+.lbl-foot-line {
+  font-family:'Courier New',monospace; font-size:8px; color:#aaa;
+  padding:3px 14px 4px; border-top:1px solid #eee; flex-shrink:0;
 }
 
 /* Tailles polices TSC */
@@ -349,26 +369,22 @@ input:focus,select:focus{border-color:var(--accent);}
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
       <div class="preview-hint" id="previewHint">APERÇU — 50 × 30 mm</div>
 
-      <!-- Étiquette 50×30mm -->
+      <!-- 50×30mm portrait -->
       <div class="lbl30" id="lbl30">
-        <div class="lbl-hd" id="p30-hd" style="height:72px;">
-          <div class="lbl-hd-job" id="p30-job" style="display:none;">
-            <span id="p30-jn"></span><span id="p30-jnum"></span>
-          </div>
-          <img class="lbl-hd-logo" id="p30-logo" src="https://www.luxvisual.lu/images/luxvisual_logo.png" style="height:22px;" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:monospace;font-weight:700;font-size:13px;color:#fff;\'>LuxVisual</span>'">
+        <div class="lbl-hd" id="p30-hd" style="height:58px;">
+          <div class="lbl-hd-job" id="p30-job" style="display:none;"><span id="p30-jn"></span><span id="p30-jnum"></span></div>
+          <img class="lbl-hd-logo" src="https://www.luxvisual.lu/images/luxvisual_logo.png" style="height:20px;" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:monospace;font-weight:700;font-size:14px;color:#fff;\'>LuxVisual</span>'">
           <div class="lbl-hd-tagline">Innovative Printing</div>
         </div>
         <div class="lbl-fields" id="p30-fields"></div>
       </div>
 
-      <!-- Étiquette 80×50mm paysage -->
+      <!-- 80×50mm paysage -->
       <div class="lbl80" id="lbl80" style="display:none">
-        <div class="lbl-hd" id="p80-hd" style="height:88px;">
-          <div class="lbl-hd-job" id="p80-job" style="display:none;">
-            <span id="p80-jn"></span><span id="p80-jnum"></span>
-          </div>
-          <img class="lbl-hd-logo" id="p80-logo" src="https://www.luxvisual.lu/images/luxvisual_logo.png" style="height:32px;" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:monospace;font-weight:700;font-size:20px;color:#fff;\'>LuxVisual</span>'">
-          <div class="lbl-hd-tagline" style="font-size:11px;">Innovative Printing</div>
+        <div class="lbl-hd" id="p80-hd" style="height:68px;">
+          <div class="lbl-hd-job" id="p80-job" style="display:none;"><span id="p80-jn"></span><span id="p80-jnum"></span></div>
+          <img class="lbl-hd-logo" src="https://www.luxvisual.lu/images/luxvisual_logo.png" style="height:28px;" alt="LuxVisual" onerror="this.outerHTML='<span style=\'font-family:monospace;font-weight:700;font-size:20px;color:#fff;\'>LuxVisual</span>'">
+          <div class="lbl-hd-tagline" style="font-size:10px;">Innovative Printing</div>
         </div>
         <div class="lbl-fields" id="p80-fields"></div>
       </div>
@@ -567,7 +583,7 @@ function pickMatFont(ml, fmt, hasJob) {
   }
 }
 
-// ── PREVIEW — design LuxVisual ──
+// ── PREVIEW — simplifié, très lisible ──
 function updatePreview() {
   const mat    = document.getElementById('matiere').value || '';
   const ep     = document.getElementById('epaisseur').value;
@@ -582,140 +598,132 @@ function updatePreview() {
   const fmt    = currentFormat;
   const pfx    = fmt===30 ? '30' : '80';
 
-  // Tailles de police selon format
-  const labelSz  = fmt===30 ? '9px'  : '13px';
-  const valueSz  = fmt===30 ? '12px' : '18px';
-  const valueSzL = fmt===30 ? '14px' : '22px'; // matière plus grande
+  // Header hauteur selon job
+  document.getElementById(`p${pfx}-hd`).style.height =
+    fmt===30 ? (hasJob?'70px':'58px') : (hasJob?'80px':'68px');
 
-  // Job dans header
+  // Job
   const jobEl = document.getElementById(`p${pfx}-job`);
   jobEl.style.display = hasJob ? 'flex' : 'none';
   if (hasJob) {
-    document.getElementById(`p${pfx}-jn`).textContent   = jn.substring(0, 20);
-    document.getElementById(`p${pfx}-jnum`).textContent = jnum.substring(0, 12);
+    document.getElementById(`p${pfx}-jn`).textContent   = jn.substring(0,22);
+    document.getElementById(`p${pfx}-jnum`).textContent = jnum.substring(0,12);
   }
 
-  // Champs dans le body
+  // Dimensions
+  let dim='';
+  if(h)   dim+=`H:${h}`;
+  if(lon) dim+=(dim?' x ':'')+`L:${lon}`;
+  if(dim) dim+=` ${ud}`;
+
+  // Ligne épaisseur + couleur sur une seule ligne si les deux présents
+  let epLine = '';
+  if(ep)      epLine += `${ep} ${unite}`;
+  if(couleur) epLine += (epLine ? '  —  ' : '') + couleur.toUpperCase();
+
+  // Tailles selon format
+  const matSz = fmt===30 ? '26px' : '46px';
+  const subSz = fmt===30 ? '15px' : '26px';
+  const dimSz = fmt===30 ? '13px' : '22px';
+
   const fields = document.getElementById(`p${pfx}-fields`);
   let html = '';
 
-  const field = (label, value, valueCss='') =>
-    value ? `<div class="lbl-field">
-      <span class="lbl-field-label" style="font-size:${labelSz};">${label}:</span>
-      <span class="lbl-field-value" style="font-size:${valueCss||valueSz};">${value}</span>
-    </div>` : `<div class="lbl-field">
-      <span class="lbl-field-label" style="font-size:${labelSz};">${label}:</span>
-      <span class="lbl-field-value" style="font-size:${valueSz};color:#bbb;">—</span>
-    </div>`;
+  // MATIÈRE — très grand, dominant
+  html += `<div class="lbl-val-main" style="font-size:${matSz};">${(mat||'MATIÈRE').toUpperCase()}</div>`;
 
-  // Matière toujours présente, plus grande
-  html += field('Matière', mat.toUpperCase() || '—', valueSzL);
-  html += field('Couleur', couleur ? couleur.toUpperCase() : '');
-  html += field('Epaisseur', ep ? `${ep} ${unite}` : '');
+  if (epLine || dim) html += `<div class="lbl-sep"></div>`;
 
-  // Dimensions
-  let dim = '';
-  if (h)   dim += `H: ${h}`;
-  if (lon) dim += (dim ? '  x  ' : '') + `L: ${lon}`;
-  if (dim) dim += ` ${ud}`;
-  html += field('Dimensions', dim);
+  // EP + COULEUR
+  if (epLine) html += `<div class="lbl-val-sub" style="font-size:${subSz};">${epLine}</div>`;
+
+  // DIMENSIONS
+  if (dim) html += `<div class="lbl-val-sub" style="font-size:${dimSz};color:#555;">${dim}</div>`;
 
   fields.innerHTML = html;
 }
 
-// ── TSC — design LuxVisual ──
-// Header noir : BAR pleine largeur + logo LuxVisual (TEXT) + tagline + job
-// Corps : labels en gras + valeurs
+// ── TSC — simplifié, très lisible ──
+// Header noir : BAR + REVERSE logo + tagline
+// Corps : matière en ÉNORME, ep+couleur, dims
 function buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,qty,fmt) {
   const MX=8;
   let c='';
   const hasJob=!!(jn||jnum);
 
+  // Ligne ep + couleur
+  let epLine='';
+  if(ep)      epLine+=`${ep} ${unite}`;
+  if(couleur) epLine+=(epLine?' - ':'')+couleur.toUpperCase().substring(0,14);
+
+  // Dimensions
+  let dim='';
+  if(h)   dim+=`H:${h}`;
+  if(lon) dim+=(dim?' x ':'')+`L:${lon}`;
+  if(dim) dim+=` ${ud}`;
+
   if (fmt===30) {
-    // 50×30mm — on imprime en DIRECTION 1 pour avoir le portrait
-    // dotW=240 (30mm), dotH=400 (50mm) avec DIRECTION 1
     const dotW=240, dotH=400;
-    const hdH=96; // ~12mm header
+    const hdH = hasJob ? 88 : 72;
     c+=`SIZE 50 mm,30 mm\r\nGAP 3 mm,0 mm\r\nDIRECTION 1,0\r\nREFERENCE 0,0\r\nOFFSET 0 mm\r\nCLS\r\n`;
 
     // Header noir
     c+=`BAR 0,0,${dotW},${hdH}\r\n`;
-
-    // Job en haut du header (texte blanc via REVERSE)
     let yh=4;
-    if (hasJob) {
-      c+=`REVERSE ${MX},${yh},${dotW-MX*2},18\r\n`;
-      c+=`TEXT ${MX},${yh},"1",0,1,1,"${jn.substring(0,16).toUpperCase()}"\r\n`;
-      if(jnum) c+=`TEXT ${dotW-MX-jnum.length*8},${yh},"1",0,1,1,"${jnum.substring(0,10).toUpperCase()}"\r\n`;
-      yh+=20;
+    if(hasJob){
+      c+=`REVERSE ${MX},${yh},${dotW-MX*2},20\r\n`;
+      c+=`TEXT ${MX},${yh},"1",0,1,1,"${jn.substring(0,20).toUpperCase()}"\r\n`;
+      if(jnum) c+=`TEXT ${dotW-MX-jnum.length*12},${yh},"1",0,1,1,"${jnum.substring(0,10)}"\r\n`;
+      yh+=22;
     }
+    // LuxVisual blanc
+    c+=`REVERSE ${MX},${yh},${dotW-MX*2},30\r\n`;
+    c+=`TEXT ${MX},${yh},"3",0,1,1,"LuxVisual"\r\n`;
+    c+=`REVERSE ${MX},${yh+28},${dotW-MX*2},16\r\n`;
+    c+=`TEXT ${MX},${yh+28},"1",0,1,1,"Innovative Printing"\r\n`;
 
-    // Logo LuxVisual en blanc (REVERSE sur zone + TEXT)
-    const logoY = hasJob ? yh+2 : 16;
-    c+=`REVERSE ${MX},${logoY},${dotW-MX*2},38\r\n`;
-    c+=`TEXT ${MX},${logoY},"4",0,1,1,"LuxVisual"\r\n`;
-    c+=`REVERSE ${MX},${logoY+32},${dotW-MX*2},18\r\n`;
-    c+=`TEXT ${MX},${logoY+32},"1",0,1,1,"Innovative Printing"\r\n`;
+    // Corps — matière en font 5×1 ou 4×1 selon longueur
+    let y = hdH+10;
+    const ml=mat.length;
+    const mF = ml<=8?'5':ml<=14?'4':'3';
+    const mH = ml<=8?50:ml<=14?35:28;
+    c+=`TEXT ${MX},${y},"${mF}",0,1,1,"${mat.toUpperCase().substring(0,16)}"\r\n`; y+=mH;
 
-    // Corps : champs
-    let y=hdH+8;
-    c+=`TEXT ${MX},${y},"2",0,1,1,"Matiere:"\r\n`; y+=22;
-    c+=`TEXT ${MX+4},${y},"3",0,1,1,"${mat.toUpperCase().substring(0,18)}"\r\n`; y+=30;
-    if(couleur){
-      c+=`TEXT ${MX},${y},"2",0,1,1,"Couleur:"\r\n`; y+=22;
-      c+=`TEXT ${MX+4},${y},"3",0,1,1,"${couleur.toUpperCase().substring(0,18)}"\r\n`; y+=30;
-    }
-    if(ep){
-      c+=`TEXT ${MX},${y},"2",0,1,1,"Epaisseur:"\r\n`; y+=22;
-      c+=`TEXT ${MX+4},${y},"3",0,1,1,"${ep} ${unite}"\r\n`; y+=30;
-    }
-    if(h||lon){
-      let dim='';if(h)dim+=`H:${h}`;if(lon)dim+=(dim?' x ':'')+`L:${lon}`;if(dim)dim+=` ${ud}`;
-      c+=`TEXT ${MX},${y},"2",0,1,1,"Dimensions:"\r\n`; y+=22;
-      c+=`TEXT ${MX+4},${y},"3",0,1,1,"${dim}"\r\n`;
-    }
+    if(epLine||dim) { c+=`BAR ${MX},${y},${dotW-MX*2},1\r\n`; y+=6; }
+    if(epLine){ c+=`TEXT ${MX},${y},"3",0,1,1,"${epLine.substring(0,16)}"\r\n`; y+=30; }
+    if(dim){    c+=`TEXT ${MX},${y},"2",0,1,1,"${dim}"\r\n`; }
 
   } else {
-    // 80×50mm paysage — DIRECTION 1
     const dotW=640, dotH=400;
-    const hdH=130;
+    const hdH = hasJob ? 96 : 78;
     c+=`SIZE 80 mm,50 mm\r\nGAP 3 mm,0 mm\r\nDIRECTION 1,0\r\nREFERENCE 0,0\r\nOFFSET 0 mm\r\nCLS\r\n`;
 
     // Header noir
     c+=`BAR 0,0,${dotW},${hdH}\r\n`;
-
-    let yh=6;
-    if (hasJob) {
+    let yh=4;
+    if(hasJob){
       c+=`REVERSE ${MX},${yh},${dotW-MX*2},24\r\n`;
       c+=`TEXT ${MX},${yh},"2",0,1,1,"${jn.substring(0,24).toUpperCase()}"\r\n`;
-      if(jnum) c+=`TEXT ${dotW-MX-jnum.length*16},${yh},"2",0,1,1,"${jnum.substring(0,12).toUpperCase()}"\r\n`;
+      if(jnum) c+=`TEXT ${dotW-MX-jnum.length*16},${yh},"2",0,1,1,"${jnum.substring(0,12)}"\r\n`;
       yh+=28;
     }
+    // LuxVisual blanc — grand
+    c+=`REVERSE ${MX},${yh},${dotW-MX*2},50\r\n`;
+    c+=`TEXT ${MX},${yh},"5",0,1,1,"LuxVisual"\r\n`;
+    c+=`REVERSE ${MX},${yh+48},${dotW-MX*2},22\r\n`;
+    c+=`TEXT ${MX},${yh+48},"2",0,1,1,"Innovative Printing"\r\n`;
 
-    // Logo LuxVisual grand
-    const logoY = hasJob ? yh : 14;
-    c+=`REVERSE ${MX},${logoY},${dotW-MX*2},56\r\n`;
-    c+=`TEXT ${MX},${logoY},"5",0,1,2,"LuxVisual"\r\n`;
-    c+=`REVERSE ${MX},${logoY+52},${dotW-MX*2},24\r\n`;
-    c+=`TEXT ${MX},${logoY+52},"2",0,1,1,"Innovative Printing"\r\n`;
+    // Corps — matière énorme
+    let y = hdH+12;
+    const ml=mat.length;
+    const mF=ml<=5?'5':ml<=9?'5':ml<=14?'4':'3';
+    const mM=ml<=5?3:ml<=9?2:ml<=14?2:1;
+    const mH=ml<=5?144:ml<=9?96:ml<=14?64:32;
+    c+=`TEXT ${MX},${y},"${mF}",0,${mM},${mM},"${mat.toUpperCase().substring(0,18)}"\r\n`; y+=mH;
 
-    // Corps
-    let y=hdH+10;
-    c+=`TEXT ${MX},${y},"3",0,1,1,"Matiere:"\r\n`; y+=30;
-    c+=`TEXT ${MX+8},${y},"4",0,1,1,"${mat.toUpperCase().substring(0,22)}"\r\n`; y+=38;
-    if(couleur){
-      c+=`TEXT ${MX},${y},"3",0,1,1,"Couleur:"\r\n`; y+=30;
-      c+=`TEXT ${MX+8},${y},"4",0,1,1,"${couleur.toUpperCase().substring(0,22)}"\r\n`; y+=38;
-    }
-    if(ep){
-      c+=`TEXT ${MX},${y},"3",0,1,1,"Epaisseur:"\r\n`; y+=30;
-      c+=`TEXT ${MX+8},${y},"4",0,1,1,"${ep} ${unite}"\r\n`; y+=38;
-    }
-    if(h||lon){
-      let dim='';if(h)dim+=`H:${h}`;if(lon)dim+=(dim?' x ':'')+`L:${lon}`;if(dim)dim+=` ${ud}`;
-      c+=`TEXT ${MX},${y},"3",0,1,1,"Dimensions:"\r\n`; y+=30;
-      c+=`TEXT ${MX+8},${y},"4",0,1,1,"${dim}"\r\n`;
-    }
+    if(epLine||dim) { c+=`BAR ${MX},${y},${dotW-MX*2},2\r\n`; y+=8; }
+    if(epLine){ c+=`TEXT ${MX},${y},"4",0,1,1,"${epLine.substring(0,22)}"\r\n`; y+=36; }
+    if(dim){    c+=`TEXT ${MX},${y},"4",0,1,1,"${dim}"\r\n`; }
   }
 
   c+=`PRINT ${qty},1\r\n`;
