@@ -557,7 +557,7 @@ function pickMatFont(ml, fmt, hasJob) {
   }
 }
 
-// ── PREVIEW — 80×50mm paysage, fond blanc ──
+// ── PREVIEW — hiérarchie calquée sur TSC 80×50mm ──
 function updatePreview() {
   const mat    = document.getElementById('matiere').value || '';
   const ep     = document.getElementById('epaisseur').value;
@@ -570,59 +570,53 @@ function updatePreview() {
   const jnum   = document.getElementById('jobNum').value.toUpperCase();
   const hasJob = jobEnabled && (jn || jnum);
 
-  // Header — juste logo LuxVisual, pas de job
-  document.getElementById('p30-hd').style.height = '50px';
+  document.getElementById('p30-hd').style.height = '48px';
   document.getElementById('p30-job').style.display = 'none';
 
-  // Taille matière — légèrement réduite
+  // Taille matière selon longueur — miroir exact TSC
   const ml = mat.length;
-  const matSz = ml<=3?'72px': ml<=5?'56px': ml<=8?'40px': ml<=12?'26px': ml<=18?'20px': '16px';
+  const matSz = ml<=3?'88px': ml<=5?'66px': ml<=8?'44px': ml<=11?'27px': ml<=16?'40px': '20px';
 
-  // Ep + couleur
-  let epLine='';
-  if(ep)      epLine+=`${ep} ${unite}`;
-
-  // Dims
   let dim='';
   if(h)   dim+=`H:${h}`;
   if(lon) dim+=(dim?' x ':'')+`L:${lon}`;
   if(dim) dim+=` ${ud}`;
 
+  const S = "font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;flex-shrink:0;";
   const fields = document.getElementById('p30-fields');
   let html='';
 
-  // MATIÈRE
-  html+=`<div style="font-family:'Courier New',monospace;font-weight:700;font-size:${matSz};color:#000;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">${(mat||'MATIÈRE').toUpperCase()}</div>`;
+  // MATIÈRE — dominante (font "5"×N TSC)
+  html+=`<div style="${S}font-weight:700;font-size:${matSz};color:#000;line-height:1.05;text-overflow:ellipsis;">${(mat||'MATIÈRE').toUpperCase()}</div>`;
+  html+=`<div style="height:3px;background:#000;margin:5px 0;flex-shrink:0;"></div>`;
 
-  // Séparateur
-  html+=`<div style="height:2px;background:#111;margin:6px 0;flex-shrink:0;"></div>`;
+  // ÉPAISSEUR — grande (font "4" TSC = 24×32 dots)
+  if(ep) html+=`<div style="${S}font-size:22px;color:#000;">${ep} ${unite}</div>`;
 
-  // ÉPAISSEUR — en gras
-  if(epLine) html+=`<div style="font-family:'Courier New',monospace;font-weight:700;font-size:22px;color:#000;white-space:nowrap;overflow:hidden;flex-shrink:0;">${epLine}</div>`;
+  // COULEUR — moyenne entre parenthèses (font "3" TSC = 20×28 dots)
+  if(couleur) html+=`<div style="${S}font-size:17px;color:#222;">(${couleur.toUpperCase()})</div>`;
 
-  // COULEUR — en italique
-  if(couleur) html+=`<div style="font-family:'Courier New',monospace;font-style:italic;font-size:20px;color:#333;white-space:nowrap;overflow:hidden;flex-shrink:0;">${couleur.toUpperCase()}</div>`;
+  // DIMENSIONS — même taille que couleur (font "3" TSC)
+  if(dim) html+=`<div style="${S}font-size:17px;color:#222;">${dim}</div>`;
 
-  // DIMS
-  if(dim) html+=`<div style="font-family:'Courier New',monospace;font-size:17px;color:#555;margin-top:3px;white-space:nowrap;overflow:hidden;flex-shrink:0;">${dim}</div>`;
-
-  // JOB — en bas, gros
+  // JOB EN BAS — séparé (font "3" TSC)
   if(hasJob){
-    html+=`<div style="margin-top:auto;padding-top:6px;border-top:2px solid #111;flex-shrink:0;">`;
-    if(jn)   html+=`<div style="font-family:'Courier New',monospace;font-weight:700;font-size:18px;color:#000;white-space:nowrap;overflow:hidden;">${jn.substring(0,30)}</div>`;
-    if(jnum) html+=`<div style="font-family:'Courier New',monospace;font-size:16px;color:#333;white-space:nowrap;overflow:hidden;">${jnum.substring(0,20)}</div>`;
+    html+=`<div style="margin-top:auto;padding-top:5px;border-top:2px solid #000;flex-shrink:0;">`;
+    if(jn)   html+=`<div style="${S}font-size:17px;color:#000;">${jn.substring(0,28)}</div>`;
+    if(jnum) html+=`<div style="${S}font-size:17px;color:#333;">${jnum.substring(0,24)}</div>`;
     html+=`</div>`;
   } else {
-    html+=`<div style="margin-top:auto;font-family:'Courier New',monospace;font-size:9px;color:#bbb;padding-top:4px;border-top:1px solid #eee;flex-shrink:0;">LuxVisual — Innovative Printing</div>`;
+    html+=`<div style="margin-top:auto;${S}font-size:8px;color:#bbb;padding-top:4px;border-top:1px solid #eee;">LuxVisual — Innovative Printing</div>`;
   }
 
   fields.innerHTML=html;
 }
 
-// ── TSC — fond blanc, texte noir, 80×50mm paysage ──
+// ── TSC — hiérarchie visuelle par taille uniquement ──
+// Font "5"×N pour matière (ÉNORME), "4" pour ep, "3" pour couleur/dims, "2" pour job
 function buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,qty,fmt) {
   const MX=8;
-  let c='', y=6;
+  let c='', y=4;
   const hasJob=!!(jn||jnum);
 
   let dim='';
@@ -630,49 +624,52 @@ function buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,qty,fmt) {
   if(lon) dim+=(dim?' x ':'')+`L:${lon}`;
   if(dim) dim+=` ${ud}`;
 
-  const dotW=640, dotH=400;
-  c+=`SIZE 80 mm,50 mm\r\nGAP 3 mm,0 mm\r\nDIRECTION 0,0\r\nREFERENCE 0,0\r\nOFFSET 0 mm\r\nCLS\r\n`;
+  const dotW=400, dotH=640;
+  // SIZE 50mm,80mm + DIRECTION 0 = paysage sur CT221B
+  // 50mm = largeur papier (400 dots), 80mm = longueur (640 dots)
+  c+=`SIZE 50 mm,80 mm\r\nGAP 3 mm,0 mm\r\nDIRECTION 0,0\r\nREFERENCE 0,0\r\nOFFSET 0 mm\r\nCLS\r\n`;
 
-  // ── MATIÈRE — légèrement réduite ──
+  // ── MATIÈRE — MAXIMALE, occupe le haut ──
   const ml=mat.length;
   let mF,mM,mH;
-  if      (ml<=3)  {mF='5';mM=3;mH=148;}
-  else if (ml<=5)  {mF='5';mM=2;mH=100;}
-  else if (ml<=8)  {mF='5';mM=1;mH=52;}
-  else if (ml<=12) {mF='4';mM=1;mH=36;}
-  else if (ml<=18) {mF='3';mM=1;mH=30;}
-  else             {mF='2';mM=1;mH=24;}
-  c+=`TEXT ${MX},${y},"${mF}",0,${mM},${mM},"${mat.toUpperCase().substring(0,22)}"\r\n`;
+  if      (ml<=3)  {mF='5';mM=4;mH=196;}
+  else if (ml<=5)  {mF='5';mM=3;mH=148;}
+  else if (ml<=8)  {mF='5';mM=2;mH=100;}
+  else if (ml<=11) {mF='5';mM=1;mH=52;}
+  else if (ml<=16) {mF='4';mM=2;mH=68;}
+  else             {mF='4';mM=1;mH=36;}
+
+  c+=`TEXT ${MX},${y},"${mF}",0,${mM},${mM},"${mat.toUpperCase().substring(0,18)}"\r\n`;
   y+=mH;
 
-  // Séparateur
-  c+=`BAR ${MX},${y},${dotW-MX*2},2\r\n`; y+=8;
+  // Séparateur épais
+  c+=`BAR ${MX},${y},${dotW-MX*2},3\r\n`; y+=9;
 
-  // ── ÉPAISSEUR — police "4" (grosse, lisible = gras TSC) ──
+  // ── ÉPAISSEUR — font "4" (grand) ──
   if(ep){
     c+=`TEXT ${MX},${y},"4",0,1,1,"${ep} ${unite}"\r\n`;
     y+=36;
   }
 
-  // ── COULEUR — police "3", entre parenthèses (italique simulé) ──
+  // ── COULEUR — font "3" (moyen, entre parenthèses) ──
   if(couleur){
-    c+=`TEXT ${MX},${y},"3",0,1,1,"(${couleur.toUpperCase().substring(0,26)})"\r\n`;
+    c+=`TEXT ${MX},${y},"3",0,1,1,"(${couleur.toUpperCase().substring(0,28)})"\r\n`;
     y+=30;
   }
 
-  // ── DIMENSIONS — police "3" ──
+  // ── DIMENSIONS — font "3" ──
   if(dim){
     c+=`TEXT ${MX},${y},"3",0,1,1,"${dim}"\r\n`;
     y+=30;
   }
 
-  // ── JOB EN BAS — gros, séparé ──
+  // ── JOB EN BAS — séparé, font "3" ──
   if(hasJob){
-    const jobBarY = dotH - (jn&&jnum ? 68 : 44);
+    const jobBarY = dotH - (jn&&jnum ? 62 : 38);
     c+=`BAR ${MX},${jobBarY},${dotW-MX*2},2\r\n`;
-    let jy=jobBarY+6;
-    if(jn)   { c+=`TEXT ${MX},${jy},"4",0,1,1,"${jn.substring(0,26).toUpperCase()}"\r\n`; jy+=36; }
-    if(jnum) { c+=`TEXT ${MX},${jy},"3",0,1,1,"${jnum.substring(0,22).toUpperCase()}"\r\n`; }
+    let jy = jobBarY+6;
+    if(jn)   { c+=`TEXT ${MX},${jy},"3",0,1,1,"${jn.substring(0,28).toUpperCase()}"\r\n`; jy+=30; }
+    if(jnum) { c+=`TEXT ${MX},${jy},"3",0,1,1,"${jnum.substring(0,24).toUpperCase()}"\r\n`; }
   } else {
     c+=`BAR ${MX},${dotH-20},${dotW-MX*2},1\r\n`;
     c+=`TEXT ${MX},${dotH-18},"1",0,1,1,"LuxVisual - Innovative Printing"\r\n`;
