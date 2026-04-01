@@ -557,147 +557,182 @@ function pickMatFont(ml, fmt, hasJob) {
   }
 }
 
-// ── PREVIEW — hiérarchie calquée sur TSC 80×50mm ──
+// ════════════════════════════════════════════════════════════════
+// MOTEUR BITMAP — aperçu et impression IDENTIQUES
+// drawLabel() dessine sur canvas 640×400 (80×50mm @203dpi)
+// updatePreview() affiche ce canvas dans l'UI
+// buildTSC() convertit canvas → bitmap 1-bit → commande BITMAP TSC
+// ════════════════════════════════════════════════════════════════
+
+function getFields() {
+  return {
+    mat    : (document.getElementById('matiere').value   || '').toUpperCase(),
+    ep     : document.getElementById('epaisseur').value,
+    unite  : document.getElementById('unite').value,
+    couleur: document.getElementById('couleur').value,
+    h      : document.getElementById('dimH').value,
+    lon    : document.getElementById('dimLon').value,
+    ud     : document.getElementById('uniteD').value,
+    jn     : jobEnabled ? document.getElementById('jobName').value.toUpperCase() : '',
+    jnum   : jobEnabled ? document.getElementById('jobNum').value.toUpperCase()  : '',
+  };
+}
+
+// Dessine l'étiquette sur un canvas 640×400px
+function drawLabel(canvas) {
+  const W = 640, H = 400;
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const f = getFields();
+  const hasJob = !!(f.jn || f.jnum);
+  const MX = 16;
+
+  // Fond blanc
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  let y = 10;
+
+  // MATIÈRE
+  const ml = (f.mat || 'X').length;
+  const matPx = ml<=3?120 : ml<=5?96 : ml<=8?72 : ml<=11?52 : ml<=16?38 : 28;
+  ctx.font = `900 ${matPx}px Arial, sans-serif`;
+  ctx.fillStyle = '#000';
+  let matText = f.mat || 'MATIÈRE';
+  while(ctx.measureText(matText).width > W - MX*2 && matText.length > 1)
+    matText = matText.slice(0, -1);
+  ctx.fillText(matText, MX, y + matPx * 0.88);
+  y += matPx + 6;
+
+  // SÉPARATEUR
+  ctx.fillStyle = '#000';
+  ctx.fillRect(MX, y, W - MX*2, 3);
+  y += 11;
+
+  // ÉPAISSEUR
+  if (f.ep) {
+    ctx.font = '700 36px Arial, sans-serif';
+    ctx.fillStyle = '#000';
+    ctx.fillText(`${f.ep} ${f.unite}`, MX, y + 32);
+    y += 46;
+  }
+
+  // COULEUR
+  if (f.couleur) {
+    ctx.font = '400 28px Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText(`(${f.couleur.toUpperCase()})`, MX, y + 26);
+    y += 36;
+  }
+
+  // DIMENSIONS
+  let dim = '';
+  if(f.h)   dim += `H:${f.h}`;
+  if(f.lon) dim += (dim ? ' x ' : '') + `L:${f.lon}`;
+  if(dim)   dim += ` ${f.ud}`;
+  if (dim) {
+    ctx.font = '400 28px Arial, sans-serif';
+    ctx.fillStyle = '#222';
+    ctx.fillText(dim, MX, y + 26);
+    y += 36;
+  }
+
+  // JOB EN BAS
+  if (hasJob) {
+    const jobBarY = H - (f.jn && f.jnum ? 78 : 48);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(MX, jobBarY, W - MX*2, 3);
+    let jy = jobBarY + 10;
+    if (f.jn) {
+      ctx.font = '700 30px Arial, sans-serif';
+      ctx.fillStyle = '#000';
+      ctx.fillText(f.jn.substring(0, 32), MX, jy + 26);
+      jy += 36;
+    }
+    if (f.jnum) {
+      ctx.font = '400 26px Arial, sans-serif';
+      ctx.fillStyle = '#333';
+      ctx.fillText(f.jnum.substring(0, 32), MX, jy + 24);
+    }
+  } else {
+    ctx.fillStyle = '#bbb';
+    ctx.fillRect(MX, H - 24, W - MX*2, 1);
+    ctx.font = '400 16px Arial, sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('LuxVisual — Innovative Printing', MX, H - 7);
+  }
+}
+
 function updatePreview() {
-  const mat    = document.getElementById('matiere').value || '';
+  const wrapper = document.getElementById('lbl30');
+  let cv = document.getElementById('previewCanvas');
+  if (!cv) {
+    wrapper.innerHTML = '';
+    wrapper.style.cssText = 'width:544px;height:340px;background:#fff;border:2px solid #111;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.25);flex-shrink:0;';
+    cv = document.createElement('canvas');
+    cv.id = 'previewCanvas';
+    cv.style.cssText = 'width:540px;height:338px;display:block;';
+    wrapper.appendChild(cv);
+  }
+  drawLabel(cv);
+}
+
+// Canvas → bitmap 1-bit packed (bit=1 = noir)
+function canvasToBitmap(canvas) {
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.getImageData(0, 0, W, H).data;
+  const bpr = Math.ceil(W / 8);
+  const buf = new Uint8Array(bpr * H);
+  for (let row = 0; row < H; row++) {
+    for (let col = 0; col < W; col++) {
+      const i = (row * W + col) * 4;
+      const lum = 0.299*img[i] + 0.587*img[i+1] + 0.114*img[i+2];
+      if (lum < 200) buf[row * bpr + Math.floor(col/8)] |= (0x80 >> (col % 8));
+    }
+  }
+  return buf;
+}
+
+function buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,qty,fmt) {
+  const cv = document.createElement('canvas');
+  drawLabel(cv);
+  const W = cv.width, H = cv.height;
+  const bpr = Math.ceil(W / 8);
+  const bitmap = canvasToBitmap(cv);
+  const enc = new TextEncoder();
+  const header = enc.encode(
+    `SIZE 50 mm,80 mm\r\nGAP 3 mm,0 mm\r\nDIRECTION 0,0\r\nREFERENCE 0,0\r\nOFFSET 0 mm\r\nCLS\r\nBITMAP 0,0,${bpr},${H},0,`
+  );
+  const footer = enc.encode(`\r\nPRINT ${qty},1\r\n`);
+  const out = new Uint8Array(header.length + bitmap.length + footer.length);
+  out.set(header, 0);
+  out.set(bitmap, header.length);
+  out.set(footer, header.length + bitmap.length);
+  return out;
+}
+
+async function printLabel() {
+  const mat = document.getElementById('matiere').value;
+  if(!mat){ showToast('⚠ Entrez le nom de la matière'); return; }
   const ep     = document.getElementById('epaisseur').value;
   const unite  = document.getElementById('unite').value;
   const couleur= document.getElementById('couleur').value;
   const h      = document.getElementById('dimH').value;
   const lon    = document.getElementById('dimLon').value;
   const ud     = document.getElementById('uniteD').value;
-  const jn     = document.getElementById('jobName').value.toUpperCase();
-  const jnum   = document.getElementById('jobNum').value.toUpperCase();
-  const hasJob = jobEnabled && (jn || jnum);
-
-  document.getElementById('p30-hd').style.height = '48px';
-  document.getElementById('p30-job').style.display = 'none';
-
-  // Taille matière selon longueur — miroir exact TSC
-  const ml = mat.length;
-  const matSz = ml<=3?'88px': ml<=5?'66px': ml<=8?'44px': ml<=11?'27px': ml<=16?'40px': '20px';
-
-  let dim='';
-  if(h)   dim+=`H:${h}`;
-  if(lon) dim+=(dim?' x ':'')+`L:${lon}`;
-  if(dim) dim+=` ${ud}`;
-
-  const S = "font-family:'Courier New',monospace;white-space:nowrap;overflow:hidden;flex-shrink:0;";
-  const fields = document.getElementById('p30-fields');
-  let html='';
-
-  // MATIÈRE — dominante (font "5"×N TSC)
-  html+=`<div style="${S}font-weight:700;font-size:${matSz};color:#000;line-height:1.05;text-overflow:ellipsis;">${(mat||'MATIÈRE').toUpperCase()}</div>`;
-  html+=`<div style="height:3px;background:#000;margin:5px 0;flex-shrink:0;"></div>`;
-
-  // ÉPAISSEUR — grande (font "4" TSC = 24×32 dots)
-  if(ep) html+=`<div style="${S}font-size:22px;color:#000;">${ep} ${unite}</div>`;
-
-  // COULEUR — moyenne entre parenthèses (font "3" TSC = 20×28 dots)
-  if(couleur) html+=`<div style="${S}font-size:17px;color:#222;">(${couleur.toUpperCase()})</div>`;
-
-  // DIMENSIONS — même taille que couleur (font "3" TSC)
-  if(dim) html+=`<div style="${S}font-size:17px;color:#222;">${dim}</div>`;
-
-  // JOB EN BAS — séparé (font "3" TSC)
-  if(hasJob){
-    html+=`<div style="margin-top:auto;padding-top:5px;border-top:2px solid #000;flex-shrink:0;">`;
-    if(jn)   html+=`<div style="${S}font-size:17px;color:#000;">${jn.substring(0,28)}</div>`;
-    if(jnum) html+=`<div style="${S}font-size:17px;color:#333;">${jnum.substring(0,24)}</div>`;
-    html+=`</div>`;
-  } else {
-    html+=`<div style="margin-top:auto;${S}font-size:8px;color:#bbb;padding-top:4px;border-top:1px solid #eee;">LuxVisual — Innovative Printing</div>`;
-  }
-
-  fields.innerHTML=html;
-}
-
-// ── TSC — hiérarchie visuelle par taille uniquement ──
-// Font "5"×N pour matière (ÉNORME), "4" pour ep, "3" pour couleur/dims, "2" pour job
-function buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,qty,fmt) {
-  const MX=8;
-  let c='', y=4;
-  const hasJob=!!(jn||jnum);
-
-  let dim='';
-  if(h)   dim+=`H:${h}`;
-  if(lon) dim+=(dim?' x ':'')+`L:${lon}`;
-  if(dim) dim+=` ${ud}`;
-
-  const dotW=400, dotH=640;
-  // SIZE 50mm,80mm + DIRECTION 0 = paysage sur CT221B
-  // 50mm = largeur papier (400 dots), 80mm = longueur (640 dots)
-  c+=`SIZE 50 mm,80 mm\r\nGAP 3 mm,0 mm\r\nDIRECTION 0,0\r\nREFERENCE 0,0\r\nOFFSET 0 mm\r\nCLS\r\n`;
-
-  // ── MATIÈRE — MAXIMALE, occupe le haut ──
-  const ml=mat.length;
-  let mF,mM,mH;
-  if      (ml<=3)  {mF='5';mM=4;mH=196;}
-  else if (ml<=5)  {mF='5';mM=3;mH=148;}
-  else if (ml<=8)  {mF='5';mM=2;mH=100;}
-  else if (ml<=11) {mF='5';mM=1;mH=52;}
-  else if (ml<=16) {mF='4';mM=2;mH=68;}
-  else             {mF='4';mM=1;mH=36;}
-
-  c+=`TEXT ${MX},${y},"${mF}",0,${mM},${mM},"${mat.toUpperCase().substring(0,18)}"\r\n`;
-  y+=mH;
-
-  // Séparateur épais
-  c+=`BAR ${MX},${y},${dotW-MX*2},3\r\n`; y+=9;
-
-  // ── ÉPAISSEUR — font "4" (grand) ──
-  if(ep){
-    c+=`TEXT ${MX},${y},"4",0,1,1,"${ep} ${unite}"\r\n`;
-    y+=36;
-  }
-
-  // ── COULEUR — font "3" (moyen, entre parenthèses) ──
-  if(couleur){
-    c+=`TEXT ${MX},${y},"3",0,1,1,"(${couleur.toUpperCase().substring(0,28)})"\r\n`;
-    y+=30;
-  }
-
-  // ── DIMENSIONS — font "3" ──
-  if(dim){
-    c+=`TEXT ${MX},${y},"3",0,1,1,"${dim}"\r\n`;
-    y+=30;
-  }
-
-  // ── JOB EN BAS — séparé, font "3" ──
-  if(hasJob){
-    const jobBarY = dotH - (jn&&jnum ? 62 : 38);
-    c+=`BAR ${MX},${jobBarY},${dotW-MX*2},2\r\n`;
-    let jy = jobBarY+6;
-    if(jn)   { c+=`TEXT ${MX},${jy},"3",0,1,1,"${jn.substring(0,28).toUpperCase()}"\r\n`; jy+=30; }
-    if(jnum) { c+=`TEXT ${MX},${jy},"3",0,1,1,"${jnum.substring(0,24).toUpperCase()}"\r\n`; }
-  } else {
-    c+=`BAR ${MX},${dotH-20},${dotW-MX*2},1\r\n`;
-    c+=`TEXT ${MX},${dotH-18},"1",0,1,1,"LuxVisual - Innovative Printing"\r\n`;
-  }
-
-  c+=`PRINT ${qty},1\r\n`;
-  return c;
-}
-
-async function printLabel() {
-  const mat=document.getElementById('matiere').value;
-  if(!mat){showToast('⚠ Entrez le nom de la matière');return;}
-  const ep=document.getElementById('epaisseur').value;
-  const unite=document.getElementById('unite').value;
-  const couleur=document.getElementById('couleur').value;
-  const h=document.getElementById('dimH').value;
-  const lon=document.getElementById('dimLon').value;
-  const ud=document.getElementById('uniteD').value;
-  const jn=jobEnabled?document.getElementById('jobName').value:'';
-  const jnum=jobEnabled?document.getElementById('jobNum').value:'';
-  addToHist(mat,ep,unite);
-  if(!printerConnected||!bleChar){showToast('⚠ Connectez l\'imprimante');return;}
+  const jn     = jobEnabled ? document.getElementById('jobName').value : '';
+  const jnum   = jobEnabled ? document.getElementById('jobNum').value  : '';
+  addToHist(mat, ep, unite);
+  if(!printerConnected || !bleChar){ showToast('⚠ Connectez l\'imprimante'); return; }
   try {
-    showToast(`🖨 Envoi × ${copies}...`);
-    const tsc=buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,copies,currentFormat);
-    await bleWrite(new TextEncoder().encode(tsc));
+    showToast('🖨 Rendu bitmap...');
+    const data = buildTSC(mat,ep,unite,couleur,h,lon,ud,jn,jnum,copies,currentFormat);
+    showToast(`📡 Envoi ${Math.round(data.length/1024)}kb × ${copies}...`);
+    await bleWrite(data);
     showToast(`✅ ${copies} étiquette(s) !`);
-  } catch(e){showToast('❌ '+e.message);}
+  } catch(e){ showToast('❌ ' + e.message); }
 }
 
 function setPreset(btn,val) {
